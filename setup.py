@@ -75,7 +75,7 @@ setup(name='malstroem',
           'gdal',
           'future',
           'scipy',
-          'click-log'
+          'click-log==0.1.8'
       ],
       extras_require={
           'test': ['pytest'],
