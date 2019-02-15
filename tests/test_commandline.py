@@ -148,7 +148,7 @@ def test_network(tmpdir):
                                  '-bluespots', labeledfile,
                                  '-flowdir', flowdirnoflatsfile,
                                  '-pourpoints', pourpointsfile,
-                                 '-pourpoints_layer', 'OGRGeoJSON',
+                                 '-pourpoints_layer', 0,
                                  '-out', str(tmpdir),
                                 ])
 
@@ -161,7 +161,7 @@ def test_rain(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['rain',
                                  '-nodes', nodesfile,
-                                 '-nodes_layer', 'OGRGeoJSON',
+                                 '-nodes_layer', 0,
                                  '-r', 10,
                                  '-r', 20,
                                  '-r', 100,

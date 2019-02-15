@@ -208,7 +208,7 @@ class VectorWriter(object):
     def __init__(self, driver, datasource, layername, fields, geomtype, crs, dsco = [], lco = []):
         self.driver = driver
         self.datasource = datasource
-        self.layername = layername
+        self.layername = str(layername)
         self.fields = list(fields) if fields else []
         self.geomtype = geomtype
         self.crs = crs
@@ -332,8 +332,10 @@ class VectorReader(object):
         if self._ds is None:
             raise Exception("Cannot open datasource: {}".format(self.datasource))
 
-        if self.layername:
-            self._lyr = self._ds.GetLayerByName(self.layername)
+        if isinstance(self.layername, int):
+            self._lyr = self._ds.GetLayerByIndex(self.layername)
+        elif self.layername:
+            self._lyr = self._ds.GetLayerByName(str(self.layername))
         else:
             self._lyr = self._ds.GetLayerByIndex(0)
         if self._lyr is None:

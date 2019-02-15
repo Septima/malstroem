@@ -47,7 +47,7 @@ def process_rain(nodes, nodes_layer, rain, out, out_layer, format, dsco, lco):
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
-    nodes_layer = str(nodes_layer)
+    nodes_layer = nodes_layer
     format = str(format)
     out_layer = str(out_layer)
 

@@ -43,7 +43,7 @@ def process_network(bluespots, flowdir, pourpoints, pourpoints_layer, out, out_n
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
-    pourpoints_reader = io.VectorReader(pourpoints, str(pourpoints_layer))
+    pourpoints_reader = io.VectorReader(pourpoints, pourpoints_layer)
     bluespot_reader = io.RasterReader(bluespots)
     flowdir_reader = io.RasterReader(flowdir)
 
