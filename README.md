@@ -49,35 +49,31 @@ Theoretically:
 
 ```bash
 pip install cython numpy scipy gdal
-pip install git+https://github.com/Kortforsyningen/malstroem.git[speedups]
+pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
 ```
 
 Unfortunately the above doesn't work on all platforms as malstroem uses som third party libraries and has some optimized code which needs to be compiled for each platform. This method should work on most linux distributions.
 
 ### Installing on Windows
 
-These instructions are for Python v2.7 64bit. Change accordingly if you prefer another version of Python.
+These instructions are for Python v3.7 64bit. Change accordingly if you prefer another version of Python.
 
- 1. [Download](https://www.python.org/downloads/windows/) and install latest Python 2.7 "Windows x86-64 MSI installer" 
- 2. [Download](http://aka.ms/vcpython27) and install "Microsoft Visual C++ Compiler for Python 2.7"
- 3. Go to [Christoph Gohlke](http://www.lfd.uci.edu/~gohlke/pythonlibs/) and download `numpy`, `gdal`, `cython` and `scipy` wheels matching your python. For Python 2.7 64 bit it should be files ending in `cp27‑cp27m‑win_amd64.whl`
+ 1. [Download](https://www.python.org/downloads/windows/) and install latest Python 3.7 "Windows x86-64 installer" 
+ 2. [Download](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017) and install "Microsoft Build Tools for Visual Studio 2017"
+ 3. Go to [Christoph Gohlke](http://www.lfd.uci.edu/~gohlke/pythonlibs/) and download `numpy`, `gdal`, `cython` and `scipy` wheels matching your python. For Python 3.7 64 bit it should be files ending in `cp37‑cp37m‑win_amd64.whl`
  4. Open windows command prompt and go to the scripts folder in your Python installation. In a defaut install it should be something like
   ```
-  cd c:\Python27\scripts
+  cd c:\Python37\scripts
   ```
  5. For each of the 4 wheel files downloaded from Gholke (starting with `numpy`) install it with pip like this:
  ```
- pip install c:\downloads\numpy‑1.11.3+mkl‑cp27‑cp27m‑win_amd64.whl
+ pip install c:\downloads\numpy‑1.15.4+mkl‑cp37‑cp37m‑win_amd64.whl
  ```
- 6. Clone malstroem from github
+ 6. Install malstroem
  ```
- git clone https://github.com/Kortforsyningen/malstroem
+ pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
  ```
- 7. Now (finally) install malstroem
- ```
- pip install c:\downloads\malstroem[speedups]
- ```
- 8. Still in the scripts folder of your Python (c:\python27\scripts) check that malstroem responds to
+ 7. Still in the scripts folder of your Python (c:\python37\scripts) check that malstroem responds to
  ```
  malstroem --help
  ```
