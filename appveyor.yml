@@ -23,16 +23,6 @@ environment:
       #DAILY_COMMIT: master
 
   matrix:
-    - PYTHON: C:\Python27
-      PYTHON_VERSION: 2.7
-      PYTHON_ARCH: 32
-      GDAL_WHEEL: https://github.com/AsgerPetersen/gdalwheels/releases/download/2.2.4_1/GDAL-2.2.4-cp27-cp27m-win32.whl
-
-    - PYTHON: C:\Python27-x64
-      PYTHON_VERSION: 2.7
-      PYTHON_ARCH: 64
-      GDAL_WHEEL: https://github.com/AsgerPetersen/gdalwheels/releases/download/2.2.4_1/GDAL-2.2.4-cp27-cp27m-win_amd64.whl
-
     - PYTHON: C:\Python37
       PYTHON_VERSION: 3.7
       PYTHON_ARCH: 32
