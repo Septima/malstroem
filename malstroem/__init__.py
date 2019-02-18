@@ -25,3 +25,5 @@ its final destination.
 Water flows from one cell to one other cell (the D8 method).
 
 """
+
+__version__ = "0.1.0-dev0"
