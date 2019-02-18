@@ -3,6 +3,7 @@ import sys
 from codecs import open as codecs_open
 from setuptools import setup, find_packages
 from distutils.extension import Extension
+import malstroem
 
 logging.basicConfig()
 log = logging.getLogger()
@@ -57,7 +58,7 @@ with codecs_open('README.rst', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='malstroem',
-      version='0.0.1',
+      version=malstroem.__version__,
       description=u"Calculate terrain bluespots and flow",
       long_description=long_description,
       classifiers=[],
