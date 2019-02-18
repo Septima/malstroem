@@ -14,17 +14,20 @@
 
 import click
 import click_log
+import sys
 
-from . import complete
-from . import dem
-from . import bluespot
-from . import stream
-from . import rain
+import malstroem
+from malstroem.scripts import complete
+from malstroem.scripts import dem
+from malstroem.scripts import bluespot
+from malstroem.scripts import stream
+from malstroem.scripts import rain
 
 
 @click.group('malstroem')
 @click.version_option()
 @click_log.simple_verbosity_option()
+@click.version_option(version=malstroem.__version__) #, prog_name="fire", help="Vis versionsnummer")
 @click_log.init()
 def cli():
     """Calculate simple hydrologic models.
@@ -61,3 +64,8 @@ cli.add_command(stream.process_network)
 
 # rain
 cli.add_command(rain.process_rain)
+
+
+# If run in pyinstaller
+if getattr(sys, 'frozen', False):
+    cli(sys.argv[1:])
