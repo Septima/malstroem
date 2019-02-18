@@ -94,7 +94,7 @@ install:
   - pip install "%CYTHON_BUILD_DEP%" --install-option="--no-cython-compile"
   - pip install numpy
   - pip install %GDAL_WHEEL%
-  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
 
 build_script:
   #- cd numpy
@@ -111,6 +111,7 @@ build_script:
       $env:Path += ";$MINGW"
       $env:NPY_NUM_BUILD_JOBS = "4"
   - python setup.py bdist_wheel
+  - pyinstaller malstroem.spec
   - ps: |
       # Upload artifact to Appveyor immediately after build
       ls dist -r | Foreach-Object {
