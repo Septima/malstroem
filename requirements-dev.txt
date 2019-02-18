@@ -1,0 +1,4 @@
+-r requirements.txt
+
+# development specific requirements
+pyinstaller
