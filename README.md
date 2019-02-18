@@ -6,6 +6,8 @@ Malstrøm is based on the ideas presented by Balstrøm and Crawford (2018).
 
 Balstrøm, T., Crawford, D., 2018, Arc-Malstrøm: A 1D hydrologic screening method for stormwater assessments based on geometric networks, Computers & Geosciences, vol. 116, pp 64-73, [doi:10.1016/j.cageo.2018.04.010](https://doi.org/10.1016/j.cageo.2018.04.010)
 
+[![Build status](https://ci.appveyor.com/api/projects/status/hhnnd65moi0fl71w/branch/master?svg=true)](https://ci.appveyor.com/project/Septima/malstroem/branch/master)
+
 ### Note:
 This is a fork of the original [malstroem repository](https://github.com/Kortforsyningen/malstroem). It seems like the original malstroem repo is not maintained anymore. This repo is intended to be a maintained version of malstroem.
 
