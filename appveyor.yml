@@ -65,6 +65,13 @@ init:
         $env:CONTAINER = "wheels"
         $env:UPLOAD_ARGS = "--no-update-index"
       }
+  - ps: |
+      function exec
+      {
+        param ( [ScriptBlock] $ScriptBlock )
+        & $ScriptBlock 2>&1 | ForEach-Object -Process { "$_" }
+        if ($LastExitCode -ne 0) { exit $LastExitCode }
+      }
 install:
   - cmd: echo "Filesystem root:"
   - dir C:\
@@ -110,14 +117,27 @@ build_script:
       }
       $env:Path += ";$MINGW"
       $env:NPY_NUM_BUILD_JOBS = "4"
+  # Only build pyinstaller exe for py37 x64. Use build_ext --inplace otherwise pyinstaller does not pick up libraries
+  - ps: |
+      if($env:PYTHON -eq "C:\Python37-x64")
+      {
+        exec { python setup.py build_ext --inplace }
+        exec { pyinstaller malstroem.spec }
+        # Upload artifact to Appveyor immediately after build
+        ls dist -r | Foreach-Object {
+          exec { appveyor PushArtifact $_.FullName }
+        }
+      }
   - python setup.py bdist_wheel
-  - pyinstaller malstroem.spec
   - ps: |
       # Upload artifact to Appveyor immediately after build
-      ls dist -r | Foreach-Object {
-          appveyor PushArtifact $_.FullName
-          pip install $_.FullName
+      ls dist -r *.whl | Foreach-Object {
+        exec { pip install $_.FullName }
+        exec { appveyor PushArtifact $_.FullName }
       }
+
+
+
 test_script:
   - pip install pytest
   - pytest
