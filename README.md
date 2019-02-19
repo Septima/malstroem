@@ -56,7 +56,15 @@ pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
 
 Unfortunately the above doesn't work on all platforms as malstroem uses som third party libraries and has some optimized code which needs to be compiled for each platform. This method should work on most linux distributions.
 
-### Installing on Windows
+### Windows
+If you are not going to write your own python program using malstroem you can just download the precompiled standalone executable.
+
+Download `malstroem.exe` from [releases](https://github.com/Septima/malstroem/releases).
+
+This file includes everything needed to run malstroem from a command prompt. You don't need to install anything else. Not even python.
+
+### Installing on Windows for programming
+If you want to use malstroem in your own python program you have to install it.
 
 These instructions are for Python v3.7 64bit. Change accordingly if you prefer another version of Python.
 
