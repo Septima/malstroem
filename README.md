@@ -40,7 +40,7 @@ Example usage
 Calculate all derived data for 10mm and 30mm rain incidents ignoring bluespots where the maximum water depth is less than 5cm:
 
 ```bash
-malstroem complete -r 10 -r 30 -filter 'maxdepth > 0.5' -dem dem.tif -outdir c:\outputdirectory
+malstroem complete -r 10 -r 30 -filter 'maxdepth > 0.05' -dem dem.tif -outdir c:\outputdirectory
 ```
 
 
