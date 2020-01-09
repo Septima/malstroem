@@ -1,9 +1,8 @@
 numpy
 cython
 pytest
-numpy
 click
 click-log==0.1.8
-gdal
+gdal >=2.3
 future
 scipy
