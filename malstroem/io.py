@@ -98,8 +98,6 @@ class RasterWriter(object):
         GDAL output format driver name
     options : dict
         Options passed to GDAL driver
-    datatype : int
-        GDAL enum value for datatype (GDALDataType)
     nodata : float or None
         Raster dataset nodata value
     """
@@ -110,7 +108,6 @@ class RasterWriter(object):
         self.crs = crs
         self.driver = 'gtiff'
         self.options = dict(tiled='yes', compress='deflate', bigtiff='if_safer')
-        self.datatype = None
         self.nodata = nodata
 
     def write(self, data):
@@ -125,24 +122,53 @@ class RasterWriter(object):
         None
 
         """
-        if not self.datatype:
-            if data.dtype == np.float64:
-                self.datatype = gdal.GDT_Float64
-            elif data.dtype == np.float32:
-                self.datatype = gdal.GDT_Float32
-                self.options['predictor'] = 2
-            elif data.dtype == np.int32:
-                self.datatype = gdal.GDT_Int32
-                self.options['predictor'] = 2
-            elif data.dtype == np.uint8:
-                self.datatype = gdal.GDT_Byte
-                self.options['predictor'] = 2
+        gdal_options = self.options.copy()
+        if data.dtype == np.float64:
+            gdal_datatype = gdal.GDT_Float64
+        elif data.dtype == np.float32:
+            gdal_datatype = gdal.GDT_Float32
+            gdal_options['predictor'] = 2
+        elif data.dtype == np.int32:
+            gdal_datatype = gdal.GDT_Int32
+            gdal_options['predictor'] = 2
+        elif data.dtype == np.uint32:
+            gdal_datatype = gdal.GDT_UInt32
+            gdal_options['predictor'] = 2
+        elif data.dtype == np.int16:
+            gdal_datatype = gdal.GDT_Int16
+            gdal_options['predictor'] = 2
+        elif data.dtype == np.uint16:
+            gdal_datatype = gdal.GDT_UInt16
+            gdal_options['predictor'] = 2
+        elif data.dtype == np.uint8:
+            gdal_datatype = gdal.GDT_Byte
+            gdal_options['predictor'] = 2
+        else:
+            # Not directly supported by GDAL. We need to cast to something supported
+            min_val = data.min()
+            max_val = data.max()
+            if data.dtype.kind in ('i','u'):
+                if min_val >= 0:
+                    if max_val <= 255:
+                        return self.write(data.astype("uint8"))
+                    elif max_val <= 65535:
+                        return self.write(data.astype("uint16"))
+                    elif max_val <= 4294967295:
+                        return self.write(data.astype("uint32"))
+                elif min_val >= -32768 and max_val <= 32767:
+                    return self.write(data.astype("int16"))
+                elif min_val >= -2147483648 and max_val <= 2147483647:
+                    return self.write(data.astype("int32"))
             else:
-                raise NotImplementedError("Cannot determine GDAL datatype for numpy datatype {}".format(data.dtype))
+                if min_val >= -3.4028235e+38 and max_val <= 3.4028235e+38:
+                    return self.write(data.astype("float32"))
+                return self.write(data.astype("float64"))
+        if not gdal_datatype:
+            raise NotImplementedError(f"Cannot determine GDAL datatype for numpy datatype {data.dtype} with values in the range [{min_val},{max_val}]")
 
         drv = gdal.GetDriverByName(self.driver)
-        opts = ["{}={}".format(k, v) for k, v in self.options.items()]
-        outds = drv.Create(self.filepath, data.shape[1], data.shape[0], 1, self.datatype, opts)
+        opts = ["{}={}".format(k, v) for k, v in gdal_options.items()]
+        outds = drv.Create(self.filepath, data.shape[1], data.shape[0], 1, gdal_datatype, opts)
 
         assert outds is not None, "Could not create output dataset {}".format(self.filepath)
 

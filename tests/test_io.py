@@ -1,6 +1,8 @@
 import pytest
+import numpy as np
 from malstroem import io
 from osgeo import osr, ogr
+from pathlib import Path
 
 def create_utm32_crs():
     crs = osr.SpatialReference()
@@ -54,4 +56,22 @@ def test_write_vector(tmpdir):
     for ix, f_exp in enumerate(fields):
         f = fdefn.GetFieldDefn(ix)
         assert f.GetName() == f_exp.GetName()
+
+
+def test_write_raster_datatypes(tmpdir):
+    data_types = ["float64", "float32", "int32", "uint32", "uint8", "int64", "uint16", "int16"]
+    shape = (25, 30)
+    data = np.arange(shape[0] * shape[1]).reshape(shape)
+    gt = (510000, 0.2, 0, 6150000, 0, -0.2)
+    tmppath = Path(tmpdir)
+
+    for dt in data_types:
+        filepath = tmppath / "dt.tif"
+        cast_data = data.astype(dt)
+        writer = io.RasterWriter(str(filepath), gt, "", nodata=None)
+        writer.write(cast_data)
+        assert filepath.exists(), f"File was not written"
+        reader = io.RasterReader(str(filepath))
+        read_data = reader.read()
+        np.testing.assert_array_equal(read_data, cast_data)
 
