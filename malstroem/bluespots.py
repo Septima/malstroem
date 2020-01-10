@@ -72,7 +72,7 @@ def assemble_pourpoints(transform, pp_pix, bluespot_stats, watershed_stats):
 
     pour_points = []
     for ix, stats in enumerate(zip(pp_pix, bluespot_stats, watershed_stats)):
-        p = dict(bspot_id=ix, type="Feature")
+        p = dict(bspot_id=ix)
         p['cell_row'] = int(stats[0]['row'])
         p['cell_col'] = int(stats[0]['col'])
         p['bspot_dmax'] = float(stats[1]['max'])  # Bluespot max depth
@@ -83,7 +83,7 @@ def assemble_pourpoints(transform, pp_pix, bluespot_stats, watershed_stats):
 
         coord = transform_cell_to_world((stats[0]['row'], stats[0]['col']), transform)
         geom = dict(type='Point', coordinates=list(coord))
-        geojson = dict(id=ix, geometry=geom, properties=p)
+        geojson = dict(id=ix, geometry=geom, properties=p, type="Feature")
         pour_points.append(geojson)
     return pour_points
 
