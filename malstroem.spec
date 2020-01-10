@@ -1,15 +1,30 @@
 # -*- mode: python -*-
+from os import environ
+from pathlib import Path
+
 
 block_cipher = None
+datas = []
+runtime_hooks = []
 
+
+# Support new proj data style.
+# If PROJ_LIB is set we assume new style. This means bundling proj data files with
+# the exe and then setting PROJ_LIB to point at the bundled data in a runtime hook.
+proj_lib = environ.get("PROJ_LIB")
+if proj_lib:
+    proj_lib_path = Path(proj_lib)
+    # https://pyinstaller.readthedocs.io/en/stable/spec-files.html#adding-data-files
+    datas.append((str(proj_lib_path / "proj.db"), "proj_data"))
+    runtime_hooks.append(Path("pyinstaller/proj_runtime_hook.py"))
 
 a = Analysis(['malstroem/scripts/cli.py'],
              pathex=['/Users/asger/Code/malstroem'],
              binaries=[],
-             datas=[],
+             datas=datas,
              hiddenimports=["malstroem.algorithms.speedups._fill","malstroem.algorithms.speedups._flow","malstroem.algorithms.speedups._label"],
              hookspath=[],
-             runtime_hooks=[],
+             runtime_hooks=runtime_hooks,
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
