@@ -43,16 +43,6 @@ environment:
       PYTHON_ARCH: 64
       GDAL_WHEEL: https://github.com/AsgerPetersen/gdalwheels/releases/download/2.3.3_1/GDAL-2.3.3-cp36-cp36m-win_amd64.whl
 
-    - PYTHON: C:\Python35
-      PYTHON_VERSION: 3.5
-      PYTHON_ARCH: 32
-      GDAL_WHEEL: https://github.com/AsgerPetersen/gdalwheels/releases/download/2.3.3_1/GDAL-2.3.3-cp35-cp35m-win32.whl
-
-    - PYTHON: C:\Python35-x64
-      PYTHON_VERSION: 3.5
-      PYTHON_ARCH: 64
-      GDAL_WHEEL: https://github.com/AsgerPetersen/gdalwheels/releases/download/2.3.3_1/GDAL-2.3.3-cp35-cp35m-win_amd64.whl
-
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
   - "ECHO \"%APPVEYOR_SCHEDULED_BUILD%\""
