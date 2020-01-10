@@ -13,6 +13,8 @@
 # -------------------------------------------------------------------------------------------------
 from __future__ import (absolute_import, division, print_function)  # , unicode_literals)
 from builtins import *
+from tempfile import TemporaryDirectory
+from pathlib import Path
 from osgeo import gdal, ogr, osr
 import numpy as np
 import json
@@ -292,20 +294,33 @@ class VectorWriter(object):
 
         """
         self._init_datasource()
-        if not isinstance(geojsonfeatures, dict) or geojsonfeatures.get('type', None) == 'Feature':
-            # Need outer level to be featurecollection
-            geojsonfeatures = dict(type="FeatureCollection", features=list(geojsonfeatures))
-
-        geojson = json.dumps(geojsonfeatures)
-        drv = ogr.GetDriverByName('GeoJSON')
-        ds = drv.Open(geojson)
-        assert ds is not None, "Malformed geojson: {}".format(geojson[:min(200, len(geojson))])
-        lyr = ds.GetLayerByIndex(0)
-        f = lyr.GetNextFeature()
-        while f:
-            self._write_ogr_feature(f)
+        # Write features to temporary geojson file and read it back again.
+        # TODO: YUCK! Rewrite to avoid this!
+        with TemporaryDirectory() as tmpdir:
+            tmpfilepath = Path(tmpdir) / "tmp.geojson"
+            with open(tmpfilepath, "w") as f:
+                if not isinstance(geojsonfeatures, dict) or geojsonfeatures.get('type', None) == 'Feature':
+                    # Need outer level to be featurecollection
+                    f.write('{"type":"FeatureCollection","features":[')
+                    for ix, feature in enumerate(geojsonfeatures):
+                        if ix > 0:
+                            f.write(",")
+                        json.dump(feature, f)
+                    f.write(']}')
+                else:
+                    json.dump(geojsonfeatures, f)
+            # NOW read the tmp file back in 
+            drv = ogr.GetDriverByName('GeoJSON')
+            ds = drv.Open(str(tmpfilepath))
+            assert ds is not None, f"Malformed geojson file: {tmpfilepath}"
+            lyr = ds.GetLayerByIndex(0)
             f = lyr.GetNextFeature()
-        self.close()
+            while f:
+                self._write_ogr_feature(f)
+                f = lyr.GetNextFeature()
+            lyr = None
+            ds = None
+            self.close()
 
     def _write_ogr_feature(self, ogrfeature):
         if not self.fieldsinitialized:
