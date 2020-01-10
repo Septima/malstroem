@@ -1,4 +1,4 @@
-name: malstroem_dev
+name: malstroem
 channels:
   - conda-forge
   - defaults
@@ -8,10 +8,7 @@ dependencies:
   - gdal
   - numpy
   - pip
-  - pyinstaller
-  - pytest
   - python=3.7
   - scipy
   - pip:
     - click-log==0.1.8
-
