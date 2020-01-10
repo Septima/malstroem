@@ -102,7 +102,7 @@ class StreamTool(object):
             # Geometry
             coord = transform_cell_to_world(n['pix'], transform)
             geom = dict(type='Point', coordinates=list(coord))
-            geojson = dict(id=n['id'], geometry=geom, properties=props)
+            geojson = dict(id=n['id'], geometry=geom, properties=props, type='Feature')
             geojson_nodes.append(geojson)
 
         self.output_nodes.write_geojson_features(geojson_nodes)
@@ -118,6 +118,6 @@ class StreamTool(object):
                     # Transform coords
                     world_coords = [transform_cell_to_world(c, transform) for c in n['geometry']]
                     geom = dict(type='LineString', coordinates=list(world_coords))
-                    geojson = dict(id=n['id'], geometry=geom, properties=props)
+                    geojson = dict(id=n['id'], geometry=geom, properties=props, type='Feature')
                     geojson_streams.append(geojson)
             self.output_streams.write_geojson_features(geojson_streams)
