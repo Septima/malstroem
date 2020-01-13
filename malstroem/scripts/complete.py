@@ -46,11 +46,10 @@ def process_all(dem, outdir, accum, filter, rain, vector):
         logger.error("outdir isn't an empty directory")
         return 1
 
-    #outvector = os.path.join(outdir, 'malstroem.gpkg')
-    outvector = os.path.join(outdir, 'vector')
-    #ogr_drv = 'gpkg'
+    outvector = os.path.join(outdir, 'malstroem.gpkg')
+    ogr_drv = 'gpkg'
     ogr_dsco = []
-    ogr_drv = 'ESRI shapefile'
+    ogr_lco = ["SPATIAL_INDEX=NO"]
     nodatasubst = -999
 
 
@@ -79,11 +78,11 @@ def process_all(dem, outdir, accum, filter, rain, vector):
     depths_reader = io.RasterReader(depths_writer.filepath)
     flowdir_reader = io.RasterReader(flowdir_writer.filepath)
     accum_reader = io.RasterReader(accum_writer.filepath) if accum_writer else None
-    pourpoint_writer = io.VectorWriter(ogr_drv, outvector, 'pourpoints', None, ogr.wkbPoint, crs, dsco=ogr_dsco)
+    pourpoint_writer = io.VectorWriter(ogr_drv, outvector, 'pourpoints', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco)
     watershed_writer = io.RasterWriter(os.path.join(outdir, 'watersheds.tif'), tr, crs, 0)
-    watershed_vector_writer = io.VectorWriter(ogr_drv, outvector, 'watersheds', None, ogr.wkbMultiPolygon, crs, dsco=ogr_dsco) if vector else None
+    watershed_vector_writer = io.VectorWriter(ogr_drv, outvector, 'watersheds', None, ogr.wkbMultiPolygon, crs, dsco=ogr_dsco, lco = ogr_lco) if vector else None
     labeled_writer = io.RasterWriter(os.path.join(outdir, 'bluespots.tif'), tr, crs, 0)
-    labeled_vector_writer = io.VectorWriter(ogr_drv, outvector, 'bluespots', None, ogr.wkbMultiPolygon, crs, dsco=ogr_dsco) if vector else None
+    labeled_vector_writer = io.VectorWriter(ogr_drv, outvector, 'bluespots', None, ogr.wkbMultiPolygon, crs, dsco=ogr_dsco, lco = ogr_lco) if vector else None
 
     bluespot_tool = bluespots.BluespotTool(
         input_depths=depths_reader,
@@ -103,15 +102,15 @@ def process_all(dem, outdir, accum, filter, rain, vector):
     pourpoints_reader = io.VectorReader(outvector, pourpoint_writer.layername)
     bluespot_reader = io.RasterReader(labeled_writer.filepath)
     flowdir_reader = io.RasterReader(flowdir_writer.filepath)
-    nodes_writer = io.VectorWriter(ogr_drv, outvector, 'nodes', None, ogr.wkbPoint, crs, dsco=ogr_dsco)
-    streams_writer = io.VectorWriter(ogr_drv, outvector, 'streams', None, ogr.wkbLineString, crs, dsco=ogr_dsco)
+    nodes_writer = io.VectorWriter(ogr_drv, outvector, 'nodes', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco)
+    streams_writer = io.VectorWriter(ogr_drv, outvector, 'streams', None, ogr.wkbLineString, crs, dsco=ogr_dsco, lco = ogr_lco)
 
     stream_tool = streams.StreamTool(pourpoints_reader, bluespot_reader, flowdir_reader, nodes_writer, streams_writer)
     stream_tool.process()
 
     # Process rain events
     nodes_reader = io.VectorReader(outvector, nodes_writer.layername)
-    events_writer = io.VectorWriter(ogr_drv, outvector, 'events', None, ogr.wkbPoint, crs, dsco=ogr_dsco)
+    events_writer = io.VectorWriter(ogr_drv, outvector, 'events', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco)
 
     rain_tool = raintool.RainTool(nodes_reader, events_writer, rain)
     rain_tool.process()
