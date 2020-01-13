@@ -63,45 +63,72 @@ Download `malstroem.exe` from [releases](https://github.com/Septima/malstroem/re
 
 This file includes everything needed to run malstroem from a command prompt. You don't need to install anything else. Not even python.
 
-### Installing on Windows for programming
-If you want to use malstroem in your own python program you have to install it.
 
-These instructions are for Python v3.7 64bit. Change accordingly if you prefer another version of Python.
+### Installing on Windows
+1. Install `Microsoft Visual C++ 14.2 standalone: Build Tools for Visual Studio 2019` as described [here](https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.2_standalone:_Build_Tools_for_Visual_Studio_2019_.28x86.2C_x64.2C_ARM.2C_ARM64.29).
 
- 1. [Download](https://www.python.org/downloads/windows/) and install latest Python 3.7 "Windows x86-64 installer" 
- 2. [Download](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017) and install "Microsoft Build Tools for Visual Studio 2017"
- 3. Go to [Christoph Gohlke](http://www.lfd.uci.edu/~gohlke/pythonlibs/) and download `numpy`, `gdal`, `cython` and `scipy` wheels matching your python. For Python 3.7 64 bit it should be files ending in `cp37‑cp37m‑win_amd64.whl`
- 4. Open windows command prompt and go to the scripts folder in your Python installation. In a defaut install it should be something like
-  ```
-  cd c:\Python37\scripts
-  ```
- 5. For each of the 4 wheel files downloaded from Gholke (starting with `numpy`) install it with pip like this:
- ```
- pip install c:\downloads\numpy‑1.15.4+mkl‑cp37‑cp37m‑win_amd64.whl
- ```
- 6. Install malstroem
- ```
- pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
- ```
- 7. Still in the scripts folder of your Python (c:\python37\scripts) check that malstroem responds to
- ```
+2. Download and install [miniconda3 64bit](https://docs.conda.io/en/latest/miniconda.html) for you Windows. (If you have other versions of python installed on your system, make sure to untick `Register Anaconda as my default Python`)
+
+3. Download the malstroem dependencies file [environment.yml](https://github.com/Septima/malstroem/raw/master/environment.yml). Note the path to the downloaded file like `C:\Users\asger\Downloads\environment.yml`.
+
+4. From the start menu, search for and open `Anaconda Prompt`.
+
+5. In the Anaconda Prompt run
+```
+conda env create -f C:\Users\asger\Downloads\environment.yml
+```
+Where `C:\Users\asger\Downloads\environment.yml` is the path to your downloaded copy of `environment.yml`.
+
+6. In the Anaconda Prompt run
+```
+conda activate malstroem
+```
+This activates the `malstroem` environment in the current prompt. Your prompt should show something like
+```
+(malstroem) C:\Users\asger>
+```
+Indicating that `malstroem` is the currently active environment.
+
+7. Install `malstroem` into the environment by running
+```
+pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
+```
+8. Still in the Anaconda Prompt check that malstroem responds to
+```
  malstroem --help
  ```
  
 ### Installing on Mac OSX
- The biggest problem on OSX is getting GDAL to work. One known solution is via [homebrew](http://brew.sh/)
- 1. Make sure homebrew is installed and you know how to use its Python (See for instance [this guide](http://docs.python-guide.org/en/latest/starting/install/osx/))
- 2. Install GDAL and its Python bindings
- 
-  ```
-  brew install gdal
-  ```
- 3. Make sure you use the homebrew Python and install malstroem and its dependencies (If you are using a virtualenv create       it using `--system-site-packages`) 
- 
-  ```
-  pip install cython numpy scipy
-  pip install git+https://github.com/Kortforsyningen/malstroem.git[speedups]
-  ```
+1. Download and install [miniconda3 64bit](https://docs.conda.io/en/latest/miniconda.html) for MacOSX.
+
+2. Download the malstroem dependencies file [environment.yml](https://github.com/Septima/malstroem/raw/master/environment.yml).
+
+3. in a terminal run
+```
+conda env create -f path/to/environment.yml
+```
+Where `path/to/environment.yml` is the path to your downloaded copy of `environment.yml`.
+
+6. Run
+```
+conda activate malstroem
+```
+This activates the `malstroem` environment in the current prompt. Your prompt should show something like
+```
+(malstroem) ~$
+```
+Indicating that `malstroem` is the currently active environment.
+
+7. Install `malstroem` into the environment by running
+```
+pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
+```
+8. Still in the Anaconda Prompt check that malstroem responds to
+```
+ malstroem --help
+ ```
+
+
 
 Bugs and contributions
 ----------------------
