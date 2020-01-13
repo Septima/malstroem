@@ -279,6 +279,7 @@ class VectorWriter(object):
         for f in self.fields:
             self._lyr.CreateField(f)
         self.fieldsinitialized = True
+        self._lyr.StartTransaction()
 
     def write_geojson_features(self, geojsonfeatures):
         """Write features to datasource
@@ -334,6 +335,7 @@ class VectorWriter(object):
             raise Exception('Error while writing to layer {}'.format(self.layername))
 
     def close(self):
+        self._lyr.CommitTransaction()
         self._lyr = None
         self._ds = None
 
