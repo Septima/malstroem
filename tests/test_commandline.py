@@ -23,7 +23,7 @@ def test_complete(tmpdir):
 
     assert np.max(data) == 486, result.output
 
-    v = io.VectorReader(str(tmpdir.join('vector')), 'events')
+    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'events')
     data = v.read_geojson_features()
     assert len(data) == 544, result.output
 
@@ -42,7 +42,7 @@ def test_complete_nofilter(tmpdir):
 
     assert np.max(data) == 523
 
-    v = io.VectorReader(str(tmpdir.join('vector')), 'events')
+    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'events')
     data = v.read_geojson_features()
     assert len(data) == 587, result.output
 
