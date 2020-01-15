@@ -12,6 +12,7 @@ dependencies:
   - pytest
   - python=3.7
   - scipy
+  - setuptools==44.0.0
   - pip:
     - click-log==0.1.8
 
