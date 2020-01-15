@@ -1,5 +1,5 @@
 import numpy as np
-
+from osgeo import osr
 from malstroem import dem, io
 from data.fixtures import dtmfile, filledfile, flowdirnoflatsfile
 
@@ -27,7 +27,9 @@ def assert_rasters_are_equal(file1, file2):
     reader2 = io.RasterReader(file2)
 
     assert reader1.transform == reader2.transform
-    assert reader1.crs == reader2.crs
+    sr1 = osr.SpatialReference(reader1.crs)
+    sr2 = osr.SpatialReference(reader2.crs)
+    assert sr1.IsSame(sr2), f"CRSs are different: sr1: {sr1.ExportToWkt()} sr2: {sr2.ExportToWkt()}"
 
     data1 = reader1.read()
     data2 = reader2.read()
