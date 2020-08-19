@@ -10,7 +10,7 @@ import os
 def test_complete(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['complete',
-                                 '-r', 10,
+                                 #'-r', 10,
                                  '-r', 100,
                                  '-filter', 'area > 20.5 and maxdepth > 0.5 or volume > 2.5',
                                  '-dem', dtmfile,
@@ -23,7 +23,7 @@ def test_complete(tmpdir):
 
     assert np.max(data) == 486, result.output
 
-    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'events')
+    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'finalstate')
     data = v.read_geojson_features()
     assert len(data) == 544, result.output
 
@@ -31,7 +31,7 @@ def test_complete(tmpdir):
 def test_complete_nofilter(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['complete',
-                                 '-r', 10,
+                                 #'-r', 10,
                                  '-r', 100,
                                  '-dem', dtmfile,
                                  '-outdir', str(tmpdir)])
@@ -42,7 +42,7 @@ def test_complete_nofilter(tmpdir):
 
     assert np.max(data) == 523
 
-    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'events')
+    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'finalstate')
     data = v.read_geojson_features()
     assert len(data) == 587, result.output
 
@@ -157,17 +157,15 @@ def test_network(tmpdir):
     assert os.path.isfile(str(tmpdir.join('streams.shp')))
 
 
-def test_rain(tmpdir):
+def test_initvolumes(tmpdir):
     runner = CliRunner()
-    result = runner.invoke(cli, ['rain',
+    result = runner.invoke(cli, ['initvolumes',
                                  '-nodes', nodesfile,
                                  '-nodes_layer', 0,
-                                 '-r', 10,
-                                 '-r', 20,
-                                 '-r', 100,
+                                 '-mm', 20,
                                  '-out', str(tmpdir)])
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
-    assert os.path.isfile(str(tmpdir.join('events.shp')))
+    assert os.path.isfile(str(tmpdir.join('initvolumes.shp')))
 
 
 def test_chained(tmpdir):
@@ -179,7 +177,8 @@ def test_chained(tmpdir):
     pourpoints = str(tmpdir.join('pourpoints.shp'))
     nodes = str(tmpdir.join('nodes.shp'))
     streams = str(tmpdir.join('streams.shp'))
-    events = str(tmpdir.join('events.shp'))
+    initvolumes = str(tmpdir.join('initvolumes.shp'))
+    final = str(tmpdir.join('finalstate.shp'))
 
     runner = CliRunner()
 
@@ -258,16 +257,21 @@ def test_chained(tmpdir):
     assert os.path.isfile(nodes)
     assert os.path.isfile(streams)
 
-    # Rain
-    result = runner.invoke(cli, ['rain',
+    # Initial volumes
+    result = runner.invoke(cli, ['initvolumes',
                                  '-nodes', str(tmpdir),
-                                 '-r', 10,
-                                 '-r', 20,
-                                 '-r', 100,
+                                 '-mm', 20,
                                  '-out', str(tmpdir)])
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
-    assert os.path.isfile(events)
+    assert os.path.isfile(initvolumes)
 
-    reader = io.VectorReader(str(tmpdir), 'events')
+    # Network
+    result = runner.invoke(cli, ['net',
+                                 '-inputvolumes', str(tmpdir),
+                                 '-out', str(tmpdir)])
+    assert result.exit_code == 0, 'Output: {}'.format(result.output)
+    assert os.path.isfile(final)
+
+    reader = io.VectorReader(str(tmpdir), 'finalstate')
     data = reader.read_geojson_features()
     assert len(data) == 544

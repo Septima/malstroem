@@ -13,9 +13,66 @@
 # -------------------------------------------------------------------------------------------------
 from __future__ import (absolute_import, division, print_function) #, unicode_literals)
 from builtins import *
+import logging
 
 from collections import defaultdict, deque
 
+class FinalStateCalculator(object):
+    """Calculate final state on a network.
+
+    This class takes the initial water volumes and calculates spill over from each blue spot to the 
+    next downstream bluespot
+
+    Parameters
+    ----------
+    input_nodes : vectorreader
+        Nodes including a precalculated initial water volume for each node
+    output_finalstatedata : vectorwriter
+        Writes the output final state data
+
+    """
+
+    def __init__(self, input_nodes, input_volume_attribute, output_finalstatedata):
+        self.input_nodes = input_nodes
+        self.input_volume_attribute = input_volume_attribute
+        self.output_finalstatedata = output_finalstatedata
+        self.logger = logging.getLogger(__name__)
+
+    def process(self):
+        """Process
+
+        Returns
+        -------
+        None
+        """
+
+        self.logger.info("Reading input nodes")
+        geojsonnodes_index = {gjn['properties']['nodeid']: gjn for gjn in self.input_nodes.read_geojson_features()}
+
+        # Only use 'properties'
+        nodes = [gjn['properties'] for gjn in geojsonnodes_index.values()]
+
+        self.logger.info("Creating stream network")
+        network = Network()
+        network.add_nodes(nodes)
+
+        # event properties to copy to geojson output
+        copy_props = ['spillv', 'v', 'pctv']
+
+        self.logger.info("Calculating final state")
+        initial_volume_attribute = self.input_volume_attribute
+        self.logger.info(f"Reading initial water volumes from '{initial_volume_attribute}'")
+        eventvalues = network.rain_event(initial_volume_attribute)
+        for e in eventvalues:
+            node_id = e['nodeid']
+            gjn = geojsonnodes_index[node_id]
+            for prop in copy_props:
+                gjn['properties'][prop] = e[prop]
+
+        self.logger.info("Writing output")
+        self.output_finalstatedata.write_geojson_features(geojsonnodes_index.values())
+
+        self.logger.info("Done")
 
 class Network(object):
     """Stream network
@@ -72,10 +129,10 @@ class Network(object):
         if downstream_id is None:
             self.root_nodes.append(node_id)
 
-    def _calc_node(self, node_id, mmrain):
+    def _calc_node(self, node_id, volume_attribute):
         node = self.nodes_index[node_id]
         area = float(node['wshed_area'])
-        wshed_water_vol = area * mmrain * 0.001
+        wshed_water_vol = float(node[volume_attribute])
         bspot_capacity = float(node['bspot_vol'])
 
         # How much is coming from upstream
@@ -91,13 +148,13 @@ class Network(object):
         spillover = max(0, total_water_vol - bspot_capacity)
 
         event = dict(nodeid=node['nodeid'])
-        event['rainv'] = wshed_water_vol  # Water vol from local catchment
+        event[volume_attribute] = wshed_water_vol  # Water vol from local catchment
         event['spillv'] = spillover  # Water vol spilled from pourpoint
         event['v'] = bspot_filled_vol  # Water vol in bluespot
         event['pctv'] = None if not bspot_capacity else 100.0 * bspot_filled_vol / bspot_capacity  # Percent filled
         self._node_rain_values[node_id] = event
 
-    def _calc_stream_tree(self, root_node_id, mmrain):
+    def _calc_stream_tree(self, root_node_id, volume_attribute):
         tree = deque()
         nodes = deque([root_node_id])
         while nodes:
@@ -108,9 +165,9 @@ class Network(object):
         # Process from leaves to root
         while tree:
             n = tree.pop()
-            self._calc_node(n, mmrain)
+            self._calc_node(n, volume_attribute)
 
-    def rain_event(self, mmrain):
+    def rain_event(self, volume_attribute):
         """Calculate rain event
 
         Parameters
@@ -125,5 +182,5 @@ class Network(object):
         """
         self._node_rain_values = {}
         for rn in self.root_nodes:
-            self._calc_stream_tree(rn, mmrain)
+            self._calc_stream_tree(rn, volume_attribute)
         return list(self._node_rain_values.values())

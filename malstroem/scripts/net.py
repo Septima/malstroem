@@ -21,39 +21,38 @@ import click
 import click_log
 
 from osgeo import ogr
-from malstroem import io, rain as raintool
+from malstroem import io, network
 
 
-@click.command('rain')
-@click.option('-nodes', required=True, help='OGR datasource containing nodes layer')
-@click.option('-nodes_layer', default='nodes', show_default=True, help='Nodes layer name ')
-@click.option('--rain', '-r', required=True, multiple=True, type=float, help='Rain event in mm')
+@click.command('net')
+@click.option('-inputvolumes', required=True, help='OGR datasource containing nodes layer with model input water volumes')
+@click.option('-inputvolumes_layer', default='initvolumes', show_default=True, help='Layer name')
+@click.option('--attribute', '-a', default='inputv', type=str, help='Attribute containing the model input water volume in [m3]')
 @click.option('-out', required=True, help='Output OGR datasource')
-@click.option('-out_layer', default='events', show_default=True, help='Layer name of output events layer')
+@click.option('-out_layer', default='finalstate', show_default=True, help='Layer name of output final state layer')
 @click.option('-format', type=str, default='ESRI shapefile', help='OGR driver. See OGR documentation')
 @click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
 @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
 @click_log.simple_verbosity_option()
-def process_rain(nodes, nodes_layer, rain, out, out_layer, format, dsco, lco):
-    """Calculate bluespot fill and spill volumes for specific rain event.
+def process_net(inputvolumes, inputvolumes_layer, attribute, out, out_layer, format, dsco, lco):
+    """Calculate bluespot fill and stream network volumes in the final state.
 
-    The rain event is evenly distributed across the entire area.
-
-    Note that multiple rain events can be calculated at once by repeating the '-r' option.
+    The rain event is defined by the initial water volumes per node.
 
     \b
     Example:
-    malstroem rain -r 10 -r 30 -nodes results.gpkg -out results.gpkg -format gpkg
+    malstroem rain -volumes results.gpkg -out results.gpkg -format gpkg
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
-    nodes_layer = nodes_layer
+    inputvolumes_layer = inputvolumes_layer
     format = str(format)
     out_layer = str(out_layer)
 
 
-    nodes_reader = io.VectorReader(nodes, nodes_layer)
-    events_writer = io.VectorWriter(format, out, out_layer, None, ogr.wkbPoint, nodes_reader.crs, dsco, lco)
+    volumes_reader = io.VectorReader(inputvolumes, inputvolumes_layer)
+    events_writer = io.VectorWriter(format, out, out_layer, None, ogr.wkbPoint, volumes_reader.crs, dsco, lco)
 
-    rain_tool = raintool.RainTool(nodes_reader, events_writer, rain)
-    rain_tool.process()
+    # Process events
+    calculator = network.FinalStateCalculator(volumes_reader, attribute, events_writer)
+    calculator.process()
