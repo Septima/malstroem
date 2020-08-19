@@ -21,7 +21,8 @@ from malstroem.scripts import complete
 from malstroem.scripts import dem
 from malstroem.scripts import bluespot
 from malstroem.scripts import stream
-from malstroem.scripts import rain
+from malstroem.scripts import initvolume
+from malstroem.scripts import net
 
 
 @click.group('malstroem')
@@ -62,8 +63,11 @@ cli.add_command(bluespot.process_pourpoints)
 # stream
 cli.add_command(stream.process_network)
 
-# rain
-cli.add_command(rain.process_rain)
+# volume
+cli.add_command(initvolume.process_volumes)
+
+# net
+cli.add_command(net.process_net)
 
 
 # If run in pyinstaller

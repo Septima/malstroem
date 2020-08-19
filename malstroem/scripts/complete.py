@@ -17,7 +17,7 @@ from builtins import *
 import click
 import click_log
 
-from malstroem import dem as demtool, bluespots, io, streams, rain as raintool
+from malstroem import dem as demtool, bluespots, io, streams, rain as raintool, network
 from ._utils import parse_filter
 from osgeo import ogr, osr
 import os
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 @click.command('complete')
 @click.option('-dem', type=click.Path(exists=True), help='DEM raster file. Horisontal and vertical units must be meters')
 @click.option('-outdir', type=click.Path(exists=True), help='Output directory')
-@click.option('--rain', '-r', required=True, multiple=True, type=float, help='Rain incident in mm')
+@click.option('--rain', '-r', required=True, multiple=False, type=float, help='Rain incident in mm')
 @click.option('-accum', is_flag=True, help='Calculate accumulated flow')
 @click.option('-vector', is_flag=True, help='Vectorize bluespots and watersheds')
 @click.option('-filter', help='Filter bluespots by area, maximum depth and volume. Format: '
@@ -61,7 +61,7 @@ def process_all(dem, outdir, accum, filter, rain, vector):
     logger.info('Processing')
     logger.info('   dem: {}'.format(dem))
     logger.info('   outdir: {}'.format(outdir))
-    logger.info('   rain: {}'.format(', '.join(['{}mm'.format(r) for r in rain])))
+    logger.info('   rain: {}mm'.format(rain))
     logger.info('   accum: {}'.format(accum))
     logger.info('   filter: {}'.format(filter))
 
@@ -108,10 +108,15 @@ def process_all(dem, outdir, accum, filter, rain, vector):
     stream_tool = streams.StreamTool(pourpoints_reader, bluespot_reader, flowdir_reader, nodes_writer, streams_writer)
     stream_tool.process()
 
-    # Process rain events
+    # Calculate volumes
     nodes_reader = io.VectorReader(outvector, nodes_writer.layername)
-    events_writer = io.VectorWriter(ogr_drv, outvector, 'events', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco)
-
-    rain_tool = raintool.RainTool(nodes_reader, events_writer, rain)
+    volumes_writer = io.VectorWriter(ogr_drv, outvector, 'initvolumes', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco) 
+    rain_tool = raintool.SimpleVolumeTool(nodes_reader, volumes_writer, "inputv" ,rain)
     rain_tool.process()
+
+    # Process final state
+    volumes_reader = io.VectorReader(outvector, volumes_writer.layername)
+    events_writer = io.VectorWriter(ogr_drv, outvector, 'finalstate', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco)
+    calculator = network.FinalStateCalculator(volumes_reader, "inputv", events_writer)
+    calculator.process()
 

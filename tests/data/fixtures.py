@@ -62,3 +62,11 @@ def wshedsdatadata():
 def pourpointsdata():
     reader = io.VectorReader(pourpointsfile)
     return reader.read_geojson_features()
+
+@pytest.fixture
+def nodesreader():
+    return io.VectorReader(nodesfile)
+
+@pytest.fixture
+def nodesdata(nodesreader):
+    return nodesreader.read_geojson_features()

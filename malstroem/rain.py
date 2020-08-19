@@ -18,31 +18,35 @@ from .network import Network
 import logging
 
 
-class RainTool(object):
-    """Calculate rain events
+class SimpleVolumeTool(object):
+    """Calculates water volume for each watershed for a simple rain event of x mm on each cell
 
     Parameters
     ----------
-    input_nodes : list
+    input_nodes : vectorreader
         Nodes
-    output_eventdata : vectorwriter
-        Writes the output event data
-    events_rainmm : list of float
-        Rain events (in mm) to process.
+    output_volumedata : vectorwriter
+        Writes the output volumes data
+    output_volume_attribute: str
+        Name of attribute which calculated water volume is written to
+    rainmm : float
+        Rain (in mm).
 
     Attributes
     ----------
     input_nodes : list
         Nodes
-    output_eventdata : vectorwriter
-
-
+    output_volumedata : vectorwriter
+        Writes the output volumes data
+    output_volume_attribute: str
+        Name of attribute which calculated water volume is written to
     """
 
-    def __init__(self, input_nodes, output_eventdata, events_rainmm):
+    def __init__(self, input_nodes, output_volumedata, output_volume_attribute, rainmm):
         self.input_nodes = input_nodes
-        self.output_eventdata = output_eventdata
-        self.events_rainmm = list(events_rainmm)
+        self.output_volumedata = output_volumedata
+        self.output_volume_attribute = str(output_volume_attribute)
+        self.rainmm = float(rainmm)
         self.logger = logging.getLogger(__name__)
 
     def process(self):
@@ -54,34 +58,18 @@ class RainTool(object):
         """
 
         self.logger.info("Reading input nodes")
-        geojsonnodes_index = {gjn['properties']['nodeid']: gjn for gjn in self.input_nodes.read_geojson_features()}
+        all_nodes = self.input_nodes.read_geojson_features()
+        
+        self.logger.info("Calculating rain volumes")
 
-        # Only use 'properties'
-        nodes = [gjn['properties'] for gjn in geojsonnodes_index.values()]
-
-        self.logger.info("Creating stream network")
-        network = Network()
-        network.add_nodes(nodes)
-
-        # event properties to copy to geojson output
-        copy_props = ['rainv', 'spillv', 'v', 'pctv']
-
-        self.logger.info("Calculating rain events")
-        for mmrain in self.events_rainmm:
-            self.logger.info("  {}mm".format(mmrain))
-            eventvalues = network.rain_event(mmrain)
-            to_props = [self._output_property(s, mmrain) for s in copy_props]
-            from_to_props = list(zip(copy_props, to_props))
-            for e in eventvalues:
-                node_id = e['nodeid']
-                gjn = geojsonnodes_index[node_id]
-                for fromprop, toprop in from_to_props:
-                    gjn['properties'][toprop] = e[fromprop]
+        self.logger.info("  {}mm".format(self.rainmm))
+        for node in all_nodes:
+            props = node["properties"]
+            area = float(props['wshed_area'])
+            wshed_water_vol = area * self.rainmm * 0.001
+            props[self.output_volume_attribute] = wshed_water_vol  # Water vol from local catchment
 
         self.logger.info("Writing output")
-        self.output_eventdata.write_geojson_features(geojsonnodes_index.values())
+        self.output_volumedata.write_geojson_features(all_nodes)
 
         self.logger.info("Done")
-
-    def _output_property(self, string, mmrain):
-        return "{}_{:g}".format(string, mmrain)
