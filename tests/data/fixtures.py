@@ -9,6 +9,8 @@ fillednoflatsfile = 'tests/data/filled_no_flats.tif'
 flowdirnoflatsfile = 'tests/data/flowdir_noflats.tif'
 labeledfile = 'tests/data/labelled.tif'
 wshedsfile = 'tests/data/wsheds.tif'
+precipraster_float_file = 'tests/data/precip_raster_float.tif'
+precipraster_byte_file = 'tests/data/precip_raster_byte.tif'
 
 # vector
 pourpointsfile = 'tests/data/pourpoints.json'

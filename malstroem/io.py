@@ -49,6 +49,10 @@ class RasterReader(object):
         Raster dataset nodata value
     nodatasubst : float or None
         Value used to replace nodata values in the raster dataset
+    shape: (int, int)
+        Raster shape (rows, columns)
+    resolution = (float, float)
+        Cell size in coordinate units (height, width)
     """
 
     def __init__(self, filepath, nodatasubst=None):
@@ -59,6 +63,8 @@ class RasterReader(object):
         self.crs = self._ds.GetProjection()
         self.nodata = self._bnd.GetNoDataValue()
         self.nodatasubst = nodatasubst
+        self.shape = self._ds.RasterYSize, self._ds.RasterXSize
+        self.resolution = (abs(self.transform[5]),abs(self.transform[1]))
 
     def read(self):
         """Read raster into 2D numpy array
@@ -408,3 +414,9 @@ class VectorReader(object):
         while f:
             yield f
             f = self._lyr.GetNextFeature()
+        self._lyr.ResetReading()
+    
+    def reset_reader(self):
+        """Resets reader to first record
+        """
+        self._lyr.ResetReading()
