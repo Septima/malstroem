@@ -178,3 +178,41 @@ def label_count(labelled):
         List-like object of same length as number of labels where result[lbl] holds the number of cells for label = lbl
     """
     return np.bincount(labelled.ravel())
+
+
+
+def label_data(data, labelled, nlabels=None, background=0):
+    """Gathers all cell values for each label.
+
+    Parameters
+    ----------
+    data : ndarray
+        Data array of same dimensions as labelled
+    labelled: ndarray
+        An integer ndarray where each value indicates a unique feature.
+    nlabels: int
+        Number of labels (np.max(labelled))
+    background: int
+        Label of background. Data is NOT returned for the background label
+
+    Returns
+    -------
+        data_per_label: list of lists
+            A list (length = nlabels) of lists which holds the data values. The data for label n are found at data_per_label[n]
+    """
+    if not nlabels:
+        nlabels = np.max(labelled)
+    
+    # Init list of lists
+    l = [[] for x in range(nlabels + 1)]
+    
+    # Collect data per label
+    ravelled_labelled = labelled.ravel()
+    ravelled_data = data.ravel()
+    for ix in range(len(ravelled_labelled)):
+        label_id = ravelled_labelled[ix]
+        data_value = ravelled_data[ix]
+        if label_id == background:
+            continue
+        l[label_id].append(data_value)
+    return l
