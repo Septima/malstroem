@@ -1,8 +1,12 @@
 import numpy as np
 import pytest
+import inspect
 
 from malstroem.algorithms import label, speedups
 from data.fixtures import filleddata, fillednoflatsdata, bspotdata, depthsdata
+
+def is_speedups_method(method):
+    return inspect.getmodule(method).__name__.startswith("malstroem.algorithms.speedups._label")
 
 
 def test_connected_components(filleddata, fillednoflatsdata):
@@ -106,3 +110,32 @@ def test_label_data(bspotdata, depthsdata):
     # Make sum in numpy using rasters only
     np_sum = np.sum(depthsdata[ bspotdata != 0 ])
     assert pytest.approx(np_sum) == global_sum, "Returned values do not sum correctly"
+
+
+def test_label_data_optimized(bspotdata, depthsdata):
+    speedups.enable()
+    assert speedups.enabled
+    data_per_label = label.label_data(depthsdata, bspotdata, nlabels=None,background=0)
+    assert len(data_per_label) > 0
+    assert len(data_per_label) == np.max(bspotdata) + 1
+    assert len(data_per_label[0]) == 0, "Background data list should be empty"
+    for e, values_list in enumerate(data_per_label[1:]):
+        assert len(values_list) > 0, f"label {e+1} has zero data values"
+    
+    # Sum collected values
+    sums = [sum(x) for x in data_per_label]
+    global_sum = sum(sums)
+
+    # Make sum in numpy using rasters only
+    np_sum = np.sum(depthsdata[ bspotdata != 0 ])
+    assert pytest.approx(np_sum) == global_sum, "Returned values do not sum correctly"
+
+
+@pytest.mark.parametrize("method", ["label_stats", "label_min_index", "label_data"])
+def test_speedups_toggl(method):
+    speedups.disable()
+    assert not is_speedups_method(getattr(label, method)), f"Speedup for {method} not disabled"
+    speedups.enable()
+    assert is_speedups_method(getattr(label, method)), f"Speedup for {method} not enabled"
+    speedups.disable()
+    assert not is_speedups_method(getattr(label, method)), f"Speedup for {method} not disabled"

@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - cython
+  - cyarray
   - future
   - gdal
   - numpy

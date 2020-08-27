@@ -17,6 +17,7 @@ import numpy as np
 
 # cimports
 cimport numpy as np
+from cyarray.carray cimport FloatArray, DoubleArray
 
 
 cdef packed struct stat_record:
@@ -162,3 +163,86 @@ def label_min_index(data, labelled, nlabels=None):
     if data.dtype == np.float64 and labelled.dtype == np.int32:
         return label_min_index_float64_int32_cython(data, labelled, nlabels)
     return label_min_index_fallback_cython(data, labelled, nlabels)
+
+def label_data(data, labelled, nlabels=None, background=0):
+    # Check types
+    if not np.can_cast(background, np.int32, "safe"):
+        raise TypeError("background must be integer")
+
+    if nlabels is None:
+        nlabels = np.max(labelled)
+    elif not np.can_cast(nlabels, np.int32, "safe"):
+            raise TypeError("nlabels must be integer")
+        
+    if data.dtype == np.float64 and labelled.dtype == np.int32:
+        result = label_data_float64_int32_cython(data, labelled, nlabels, background)
+    elif data.dtype == np.float32 and labelled.dtype == np.int32:
+        result = label_data_float32_int32_cython(data, labelled, nlabels, background)
+    else:
+        result = label_data_fallback_cython(data, labelled, nlabels, background)
+    return [np.array(x.get_npy_array()) for x in result]
+
+
+@cython.boundscheck(False)
+cdef label_data_float32_int32_cython(np.float32_t[:,:] data, np.int32_t[:,:] labels, max_label, background):
+    cdef FloatArray tmp_cyarray    
+    cdef unsigned int r, c
+    cdef np.float32_t val
+    cdef np.int32_t lbl, background_lbl
+
+    # In cython list of lists: https://stackoverflow.com/questions/33851333/cython-how-do-you-create-an-array-of-cdef-class    
+    list_of_cyarrays = list(FloatArray() for i in range(max_label + 1))
+    
+    # Collect data per label
+    for r in range(0, data.shape[0]):
+        for c in range(0, data.shape[1]):
+            lbl = labels[r,c]
+            val = data[r,c]
+            if lbl == 0:
+                continue
+            tmp_cyarray = <FloatArray?>list_of_cyarrays[lbl]
+            tmp_cyarray.c_append(val)
+    return list_of_cyarrays
+
+
+@cython.boundscheck(False)
+cdef label_data_float64_int32_cython(np.float64_t[:,:] data, np.int32_t[:,:] labels, max_label, background):
+    cdef DoubleArray tmp_cyarray    
+    cdef unsigned int r, c
+    cdef np.float64_t val
+    cdef np.int32_t lbl, background_lbl
+    
+    # In cython list of lists: https://stackoverflow.com/questions/33851333/cython-how-do-you-create-an-array-of-cdef-class    
+    list_of_cyarrays = list(DoubleArray() for i in range(max_label + 1))
+    
+    # Collect data per label
+    for r in range(0, data.shape[0]):
+        for c in range(0, data.shape[1]):
+            lbl = labels[r,c]
+            val = data[r,c]
+            if lbl == 0:
+                continue
+            tmp_cyarray = <DoubleArray?>list_of_cyarrays[lbl]
+            tmp_cyarray.c_append(val)
+    return list_of_cyarrays
+
+@cython.boundscheck(False)
+cdef label_data_fallback_cython(data, labels, max_label, background):
+    cdef DoubleArray tmp_cyarray    
+    cdef unsigned int r, c
+    cdef np.float64_t val
+    cdef np.int64_t lbl, background_lbl
+    
+    # In cython list of lists: https://stackoverflow.com/questions/33851333/cython-how-do-you-create-an-array-of-cdef-class    
+    list_of_cyarrays = list(DoubleArray() for i in range(max_label + 1))
+    
+    # Collect data per label
+    for r in range(0, data.shape[0]):
+        for c in range(0, data.shape[1]):
+            lbl = labels[r,c]
+            val = data[r,c]
+            if lbl == 0:
+                continue
+            tmp_cyarray = <DoubleArray?>list_of_cyarrays[lbl]
+            tmp_cyarray.c_append(val)
+    return list_of_cyarrays

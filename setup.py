@@ -33,7 +33,7 @@ INSTALL_REQUIRES = [
           'click-log==0.1.8']
 EXTRAS_REQUIRE = {
           'test': ['pytest'],
-          'speedups': ['cython'],
+          'speedups': ['cython', 'cyarray'],
           'doc': ['sphinx_rtd_theme']
       }
 ENTRY_POINTS = """
