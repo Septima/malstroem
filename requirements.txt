@@ -1,5 +1,6 @@
 numpy
 cython
+cyarray
 pytest
 click
 click-log==0.1.8

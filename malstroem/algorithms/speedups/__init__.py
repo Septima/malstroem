@@ -73,6 +73,9 @@ def enable():
     _orig['label.label_min_index'] = label.label_min_index
     label.label_min_index = _label.label_min_index
 
+    _orig['label.label_data'] = label.label_data
+    label.label_data = _label.label_data
+
     global enabled
     enabled = True
 
@@ -92,6 +95,7 @@ def disable():
 
     label.label_stats = _orig['label.label_stats']
     label.label_min_index = _orig['label.label_min_index']
+    label.label_data = _orig['label.label_data']
 
     _orig.clear()
 
