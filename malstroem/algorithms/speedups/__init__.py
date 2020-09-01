@@ -22,11 +22,12 @@ logger = logging.getLogger(__name__)
 from .. import flow, fill, label
 
 try:
+    logger.info("Trying to import speedups")
     from malstroem.algorithms.speedups import _fill, _flow, _label
     available = True
     import_error_msg = None
 except ImportError as e:
-    logger.info("Could not import speedups", exc_info=e)
+    logger.error("Could not import speedups", exc_info=e)
     available = False
 
 __all__ = ['available', 'enable', 'disable', 'enabled']
