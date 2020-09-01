@@ -168,6 +168,31 @@ def test_initvolumes(tmpdir):
     assert os.path.isfile(str(tmpdir.join('initvolumes.shp')))
 
 
+def test_hyps(tmpdir):
+    runner = CliRunner()
+    out_file = str(tmpdir.join('hyps.csv'))
+    result = runner.invoke(cli, ['hyps',
+                                 '-bluespots', labeledfile,
+                                 '-dem', dtmfile,
+                                 '-pourpoints', pourpointsfile,
+                                 '-zresolution', 0.1,
+                                 '-out', out_file])
+    assert result.exit_code == 0, 'Output: {}'.format(result.output)
+    assert os.path.isfile(out_file)
+    from csv import DictReader
+    from malstroem import hyps
+    with open(out_file) as f:
+        reader = DictReader(f)
+        for row in reader:
+            for float_key in ["bspot_dmax", "hist_num_bins", "hist_lower_bound", "hist_upper_bound", "hist_resolution", "zmin", "zmax", "cell_area"]:
+                float(row[float_key])
+            assert int(row["hist_num_bins"]) > 0
+
+            h = hyps._hypsometrystats_from_flatdict(row)
+            assert len(h.zhistogram.counts) > 0 
+            hyps._assert_hypsometrystats_valid(h)           
+
+
 def test_chained(tmpdir):
     filled = str(tmpdir.join('filled.tif'))
     depths = str(tmpdir.join('depths.tif'))

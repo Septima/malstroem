@@ -23,6 +23,7 @@ from malstroem.scripts import bluespot
 from malstroem.scripts import stream
 from malstroem.scripts import initvolume
 from malstroem.scripts import net
+from malstroem.scripts import hyps
 
 
 @click.group('malstroem')
@@ -68,6 +69,9 @@ cli.add_command(initvolume.process_volumes)
 
 # net
 cli.add_command(net.process_net)
+
+# hyps
+cli.add_command(hyps.process_hypsometry)
 
 
 # If run in pyinstaller
