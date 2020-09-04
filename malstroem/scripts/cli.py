@@ -22,7 +22,7 @@ from malstroem.scripts import dem
 from malstroem.scripts import bluespot
 from malstroem.scripts import stream
 from malstroem.scripts import initvolume
-from malstroem.scripts import net
+from malstroem.scripts import finalstate
 from malstroem.scripts import hyps
 
 
@@ -68,11 +68,13 @@ cli.add_command(stream.process_network)
 cli.add_command(initvolume.process_volumes)
 
 # net
-cli.add_command(net.process_net)
+cli.add_command(finalstate.process_net)
 
 # hyps
 cli.add_command(hyps.process_hypsometry)
 
+# final levels
+cli.add_command(finalstate.process_finallevels)
 
 # If run in pyinstaller
 if getattr(sys, 'frozen', False):
