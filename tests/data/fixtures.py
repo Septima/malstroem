@@ -19,6 +19,7 @@ streamsfile = 'tests/data/streams.json'
 hypsfile = 'tests/data/hyps.csv'
 initvolsfile = 'tests/data/initvolumes.geojson'
 finalvolsfile = 'tests/data/finalvolumes.geojson'
+finallevelsfile = 'tests/data/finallevels.geojson'
 
 
 def readraster(filepath):

@@ -216,3 +216,22 @@ def label_data(data, labelled, nlabels=None, background=0):
             continue
         l[label_id].append(data_value)
     return l
+
+
+def set_label_to_value(labelled, bluespot_values):
+    """Creates a ndarray with dimensions as labelled where eachs cell is set to the value specified for that label.
+
+    Background cells are set to the value of `set_background_to`.
+
+    Parameters
+    ----------
+    labelled : ndarray
+        An integer ndarray where each value indicates a unique feature.
+    bluespot_values : arraylike
+        Arraylike of values where the index in the list corresponds to the label.
+    """
+
+    np_values = np.array(bluespot_values)
+    # ravel labels raster and use label id to look up value. Reshape the large 1-dim float array to 2d array
+    bs_values_raster = np_values[ labelled.ravel() ].reshape(labelled.shape)
+    return bs_values_raster

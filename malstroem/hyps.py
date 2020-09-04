@@ -66,8 +66,12 @@ def bluespot_hypsometry_stats(bluespotlabels, dem, resolution, labels_max = None
 
     logger.debug("Calculating histograms")
     for label, data in enumerate(label_data_values):
-        bins = histogram_bins(label_z_stats[label]["min"], label_z_stats[label]["max"], resolution)
-        counts, _ = np.histogram(data, bins.num_bins, (bins.lower_bound, bins.upper_bound))
+        if label == background:
+            bins = HistogramBinsInfo(0, 0, 0, -1)
+            counts = []
+        else:
+            bins = histogram_bins(label_z_stats[label]["min"], label_z_stats[label]["max"], resolution)
+            counts, _ = np.histogram(data, bins.num_bins, (bins.lower_bound, bins.upper_bound))
         yield label, HypsometryStats(Histogram(counts, bins), label_z_stats[label]["min"], label_z_stats[label]["max"])
 
     
@@ -107,7 +111,8 @@ def _hypsometrystats_to_flatdict(hyps):
 
 def hypsometrystats_from_flatdict(d):
     bins = HistogramBinsInfo(int(d["hist_num_bins"]), float(d["hist_lower_bound"]), float(d["hist_upper_bound"]), float(d["hist_resolution"]))
-    counts = [int(x) for x in d["hist_counts"].split("|")]
+    # num_bins == 0 happens for background label
+    counts = [int(x) for x in d["hist_counts"].split("|")] if bins.num_bins > 0 else [] 
     h = Histogram(counts, bins)
     zmin = float(d["zmin"])
     zmax = float(d["zmax"])
