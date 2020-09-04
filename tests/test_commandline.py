@@ -192,13 +192,14 @@ def test_hyps(tmpdir):
     with open(out_file) as f:
         reader = DictReader(f)
         for row in reader:
-            for float_key in ["bspot_dmax", "hist_num_bins", "hist_lower_bound", "hist_upper_bound", "hist_resolution", "zmin", "zmax", "cell_area"]:
-                float(row[float_key])
-            assert int(row["hist_num_bins"]) > 0
+            if int(row["bspot_id"]) != 0:
+                for float_key in ["bspot_dmax", "hist_num_bins", "hist_lower_bound", "hist_upper_bound", "hist_resolution", "zmin", "zmax", "cell_area"]:
+                    float(row[float_key])
+                assert int(row["hist_num_bins"]) > 0
 
-            h = hyps.hypsometrystats_from_flatdict(row)
-            assert len(h.zhistogram.counts) > 0 
-            hyps.assert_hypsometrystats_valid(h)    
+                h = hyps.hypsometrystats_from_flatdict(row)
+                assert len(h.zhistogram.counts) > 0 
+                hyps.assert_hypsometrystats_valid(h)    
 
 def test_finallevels(tmpdir):
     runner = CliRunner()

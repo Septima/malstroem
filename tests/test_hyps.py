@@ -22,8 +22,9 @@ def test_bluespot_hypsometry_stats(tmp_path):
     assert sum(i8.zhistogram.counts) == 751
     
     for lbl, stats in hypsinfo:
-        assert_hypsometrystats_valid(stats)
-        assert stats.zhistogram.bins.resolution == resolution
+        if lbl != 0:
+            assert_hypsometrystats_valid(stats)
+            assert stats.zhistogram.bins.resolution == resolution
 
 
 def test_bluespot_hypsometry_io(tmp_path):
@@ -53,7 +54,8 @@ def test_bluespot_hypsometry_io(tmp_path):
     assert sum(i8.zhistogram.counts) == 751
 
     for h in hypsinfo:
-        assert h["geometry"] is None
-        i = hypsometrystats_from_flatdict(h["properties"])
-        assert_hypsometrystats_valid(i)
-        assert pytest.approx(cell_area) == h["properties"]["cell_area"] 
+        if h["properties"]["bspot_id"] != 0:
+            assert h["geometry"] is None
+            i = hypsometrystats_from_flatdict(h["properties"])
+            assert_hypsometrystats_valid(i)
+            assert pytest.approx(cell_area) == h["properties"]["cell_area"] 

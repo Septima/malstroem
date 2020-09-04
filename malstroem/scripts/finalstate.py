@@ -75,6 +75,9 @@ def process_net(inputvolumes, inputvolumes_layer, attribute, out, out_layer, for
 def process_finallevels(finalvols, finalvols_layer, hyps, hyps_layer, out, out_layer, format, dsco, lco):
     """Approximate water levels of bluespots in the final state.
 
+    This proces assumes that a given bluespot is filled in cell Z order (from lowest to highest cells). No attempt is made
+    to model how water actually flows within the bluespot. 
+
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
     finalvols_reader = io.VectorReader(finalvols, finalvols_layer)
@@ -86,25 +89,26 @@ def process_finallevels(finalvols, finalvols_layer, hyps, hyps_layer, out, out_l
 
 
 
+@click.command('finalbluespots')
+@click.option('-bluespots', required=True, type=click.Path(exists=True), help='Bluespots file (bluespot ids with maximum extent)')
+@click.option('-dem', required=True, type=click.Path(exists=True), help='DEM file')
+@click.option('-finallevels', required=True, help='OGR datasource containing final state water Z levels')
+@click.option('-finallevels_layer', default='finallevels', show_default=True, help='Layer name')
+@click.option('-out_depths', required=False, type=click.Path(exists=False), help='Output file (approximate depths)')
+@click.option('-out_bluespots', required=False, type=click.Path(exists=False), help='Output file (approximated bluespots)')
+@click_log.simple_verbosity_option()
+def process_bluespots(bluespots, dem, finallevels, finallevels_layer, out_depths, out_bluespots):
+    """Approximate extent and depths of bluespots in the final state.
 
-# @click.command('finalbs')
-# @click.option('-bluespots', required=True, type=click.Path(exists=True), help='Bluespot ID file')
-# @click.option('-dem', required=True, type=click.Path(exists=True), help='DEM file')
-# @click.option('-finalstate', required=True, help='OGR datasource containing final state water volumes')
-# @click.option('-finalstate_layer', default='finalstate', show_default=True, help='Layer name')
-# @click.option('-hyps', required=True, help='OGR datasource containing hypsometric measures for each bluespot')
-# @click.option('-hyps_layer', default='hyps', show_default=True, help='Layer name')
-# @click.option('-out_depths', required=False, type=click.Path(exists=False), help='Output depths file')
-# @click.option('-out', required=True, help='Output OGR datasource if polygons should be processed')
-# @click.option('-out_levels_layer', default='finallevels', show_default=True, help='Layer name of output final state bluespot water level info')
-# @click.option('-out_polys_layer', default='finalextents', show_default=True, help='Layer name of output final state bluespot polygons')
-# @click.option('-format', type=str, default='ESRI shapefile', help='OGR driver. See OGR documentation')
-# @click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
-# @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
-# @click_log.simple_verbosity_option()
-# def process_net(bluespots, dem, finalstate, finalstate_layer, hyps, hyps_layer, out_depths, , format, dsco, lco):
-#     """Approximate depths and extents of bluespots in the final state.
+    """
+    if not out_depths and not out_bluespots:
+        raise click.UsageError("No output specified")
 
-#     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
-#     """
-#     dem_reader = io.RasterReader(dem, nodatasubst=NODATASUBST)
+    bspot_reader = io.RasterReader(bluespots)
+    dem_reader = io.RasterReader(dem, nodatasubst=-999)
+    levels_reader = io.VectorReader(finallevels, finallevels_layer)
+
+    depths_writer = io.RasterWriter(str(out_depths), bspot_reader.transform, bspot_reader.crs)
+    final_bs_writer = io.RasterWriter(str(out_bluespots), bspot_reader.transform, bspot_reader.crs, nodata=0)
+
+    approx.approx_bluespots_io(bspot_reader, levels_reader, dem_reader, depths_writer, final_bs_writer)

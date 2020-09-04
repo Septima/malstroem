@@ -76,6 +76,9 @@ cli.add_command(hyps.process_hypsometry)
 # final levels
 cli.add_command(finalstate.process_finallevels)
 
+# final state bluespots and depths
+cli.add_command(finalstate.process_bluespots)
+
 # If run in pyinstaller
 if getattr(sys, 'frozen', False):
     cli(sys.argv[1:])
