@@ -16,6 +16,9 @@ precipraster_byte_file = 'tests/data/precip_raster_byte.tif'
 pourpointsfile = 'tests/data/pourpoints.json'
 nodesfile = 'tests/data/nodes.json'
 streamsfile = 'tests/data/streams.json'
+hypsfile = 'tests/data/hyps.csv'
+initvolsfile = 'tests/data/initvolumes.geojson'
+finalvolsfile = 'tests/data/finalvolumes.geojson'
 
 
 def readraster(filepath):
