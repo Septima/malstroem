@@ -70,7 +70,7 @@ def process_bspots(depths, out, filter):
 @click.option('-flowdir', required=True, type=click.Path(exists=True), help='Flow directions file')
 @click.option('-out', required=True, type=click.Path(exists=False), help='Output file (bluespot watersheds)')
 def process_wsheds(bluespots, flowdir, out):
-    """Calculate bluespot watersheds.
+    """Bluespot watersheds.
 
     Assign bluespot ID to all cells within the local bluespot watershed.
     """
