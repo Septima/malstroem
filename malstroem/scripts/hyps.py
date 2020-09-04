@@ -16,6 +16,7 @@ import click_log
 from osgeo import ogr
 from malstroem import io, hyps
 
+NODATASUBST = -999
 
 @click.command('hyps')
 @click.option('-bluespots', required=True, type=click.Path(exists=True), help='Bluespot ID file')
@@ -30,7 +31,7 @@ from malstroem import io, hyps
 @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
 @click_log.simple_verbosity_option()
 def process_hypsometry(bluespots, dem, pourpoints, pourpoints_layer, zresolution, out, out_hyps_layer, format, dsco, lco):
-    """Calculate statistical hypsometric (terrain elevation) measures for each bluespot.
+    """Statistical terrain elevation measures for each bluespot.
 
     For each bluespot these values describing the terrain within the bluespot are returned: 
         - A DEM Z value histogram with user definable bin width (resolution)
@@ -44,7 +45,7 @@ def process_hypsometry(bluespots, dem, pourpoints, pourpoints_layer, zresolution
     """
     pourpoints_reader = io.VectorReader(pourpoints, pourpoints_layer)
     labeled_reader = io.RasterReader(bluespots)
-    dem_reader = io.RasterReader(dem)
+    dem_reader = io.RasterReader(dem, nodatasubst=NODATASUBST)
 
     ogr_format = str(format)
     hyps_writer = io.VectorWriter(ogr_format, out, out_hyps_layer, None, ogr.wkbNone, dem_reader.crs)
