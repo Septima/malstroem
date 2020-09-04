@@ -258,7 +258,8 @@ class VectorWriter(object):
             return
 
         srs = osr.SpatialReference()
-        srs.ImportFromWkt(self.crs)
+        if self.geomtype != ogr.wkbNone or self.crs:
+            srs.ImportFromWkt(self.crs)
         drv = ogr.GetDriverByName(self.driver)
 
         try:
@@ -390,7 +391,7 @@ class VectorReader(object):
         if self._lyr is None:
             raise Exception("Cannot open layer {} from datasource: {}".format(self.layername, self.datasource))
 
-        self.crs = self._lyr.GetSpatialRef().ExportToWkt()
+        self.crs = self._lyr.GetSpatialRef().ExportToWkt() if self._lyr.GetSpatialRef() else None
 
     def read_geojson_features(self):
         """Read all features formatted as geojson
