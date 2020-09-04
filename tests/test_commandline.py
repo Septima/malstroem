@@ -2,7 +2,7 @@ from click.testing import CliRunner
 
 from malstroem.scripts.cli import cli
 from malstroem import io
-from data.fixtures import dtmfile, filledfile, flowdirnoflatsfile, depthsfile, labeledfile, wshedsfile, pourpointsfile, nodesfile
+from data.fixtures import dtmfile, filledfile, flowdirnoflatsfile, depthsfile, labeledfile, wshedsfile, pourpointsfile, nodesfile, initvolsfile, finalvolsfile, hypsfile
 import numpy as np
 import os
 
@@ -163,10 +163,18 @@ def test_initvolumes(tmpdir):
                                  '-nodes', nodesfile,
                                  '-nodes_layer', 0,
                                  '-mm', 20,
-                                 '-out', str(tmpdir)])
+                                 '-out', str(tmpdir)],)
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
     assert os.path.isfile(str(tmpdir.join('initvolumes.shp')))
 
+def test_finalvols(tmpdir):
+    runner = CliRunner()
+    out_file = str(tmpdir.join("finalvolumes.shp"))
+    result = runner.invoke(cli, ['finalvols',
+                                 '-inputvolumes', initvolsfile,
+                                 '-out', str(tmpdir)])
+    assert result.exit_code == 0, 'Output: {}'.format(result.output)
+    assert os.path.isfile(out_file)
 
 def test_hyps(tmpdir):
     runner = CliRunner()
@@ -188,9 +196,25 @@ def test_hyps(tmpdir):
                 float(row[float_key])
             assert int(row["hist_num_bins"]) > 0
 
-            h = hyps._hypsometrystats_from_flatdict(row)
+            h = hyps.hypsometrystats_from_flatdict(row)
             assert len(h.zhistogram.counts) > 0 
-            hyps._assert_hypsometrystats_valid(h)           
+            hyps.assert_hypsometrystats_valid(h)    
+
+def test_finallevels(tmpdir):
+    runner = CliRunner()
+    out_file = str(tmpdir.join('hyps.geojson'))
+    result = runner.invoke(cli, ['finallevels',
+                                 '-finalvols', finalvolsfile,
+                                 '-hyps', hypsfile,
+                                 '-out', out_file])
+    assert result.exit_code == 0, 'Output: {}'.format(result.output)
+    assert os.path.isfile(out_file)
+    import json
+    with open(out_file) as f:
+        parsed = json.load(f)
+        for row in parsed["features"]:
+            for float_key in ["approx_z"]:
+                float(row["properties"][float_key])
 
 
 def test_chained(tmpdir):
@@ -203,7 +227,7 @@ def test_chained(tmpdir):
     nodes = str(tmpdir.join('nodes.shp'))
     streams = str(tmpdir.join('streams.shp'))
     initvolumes = str(tmpdir.join('initvolumes.shp'))
-    final = str(tmpdir.join('finalstate.shp'))
+    final = str(tmpdir.join('finalvolumes.shp'))
 
     runner = CliRunner()
 
@@ -291,12 +315,12 @@ def test_chained(tmpdir):
     assert os.path.isfile(initvolumes)
 
     # Network
-    result = runner.invoke(cli, ['net',
+    result = runner.invoke(cli, ['finalvols',
                                  '-inputvolumes', str(tmpdir),
                                  '-out', str(tmpdir)])
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
     assert os.path.isfile(final)
 
-    reader = io.VectorReader(str(tmpdir), 'finalstate')
+    reader = io.VectorReader(str(tmpdir), 'finalvolumes')
     data = reader.read_geojson_features()
     assert len(data) == 544

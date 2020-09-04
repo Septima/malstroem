@@ -2,7 +2,7 @@ import pytest
 from osgeo import ogr
 from data.fixtures import dtmfile, labeledfile, pourpointsfile
 from malstroem.io import RasterReader, VectorReader, VectorWriter
-from malstroem.hyps import bluespot_hypsometry_stats, HypsometryStats, Histogram, HistogramBinsInfo, bluespot_hypsometry_io, _hypsometrystats_from_flatdict, _assert_hypsometrystats_valid
+from malstroem.hyps import bluespot_hypsometry_stats, HypsometryStats, Histogram, HistogramBinsInfo, bluespot_hypsometry_io, hypsometrystats_from_flatdict, assert_hypsometrystats_valid
 
 
 def test_bluespot_hypsometry_stats(tmp_path):
@@ -22,7 +22,7 @@ def test_bluespot_hypsometry_stats(tmp_path):
     assert sum(i8.zhistogram.counts) == 751
     
     for lbl, stats in hypsinfo:
-        _assert_hypsometrystats_valid(stats)
+        assert_hypsometrystats_valid(stats)
         assert stats.zhistogram.bins.resolution == resolution
 
 
@@ -46,7 +46,7 @@ def test_bluespot_hypsometry_io(tmp_path):
 
     hypsinfo = parsed["features"]
     assert len(hypsinfo) == 105
-    i8 = _hypsometrystats_from_flatdict(hypsinfo[8]["properties"])
+    i8 = hypsometrystats_from_flatdict(hypsinfo[8]["properties"])
     assert isinstance(i8, HypsometryStats)
     assert isinstance(i8.zhistogram, Histogram)
     assert len(i8.zhistogram.counts) == 22
@@ -54,6 +54,6 @@ def test_bluespot_hypsometry_io(tmp_path):
 
     for h in hypsinfo:
         assert h["geometry"] is None
-        i = _hypsometrystats_from_flatdict(h["properties"])
-        _assert_hypsometrystats_valid(i)
+        i = hypsometrystats_from_flatdict(h["properties"])
+        assert_hypsometrystats_valid(i)
         assert pytest.approx(cell_area) == h["properties"]["cell_area"] 
