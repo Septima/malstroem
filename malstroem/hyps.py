@@ -33,6 +33,7 @@ def bluespot_hypsometry_io(bluespots_reader, dem_reader, pourpoints_reader, reso
     
     cell_area = bluespots_reader.resolution[0] * bluespots_reader.resolution[1]
 
+    logger.debug("Reading input data")
     bluespotlabels = bluespots_reader.read()
     dem = dem_reader.read()
     pourpoints_index = {gjn['properties']['bspot_id']: gjn for gjn in pourpoints_reader.read_geojson_features()}
@@ -104,7 +105,7 @@ def _hypsometrystats_to_flatdict(hyps):
     }
     
 
-def _hypsometrystats_from_flatdict(d):
+def hypsometrystats_from_flatdict(d):
     bins = HistogramBinsInfo(int(d["hist_num_bins"]), float(d["hist_lower_bound"]), float(d["hist_upper_bound"]), float(d["hist_resolution"]))
     counts = [int(x) for x in d["hist_counts"].split("|")]
     h = Histogram(counts, bins)
@@ -113,7 +114,7 @@ def _hypsometrystats_from_flatdict(d):
     return HypsometryStats(h, zmin, zmax)
 
 
-def _assert_hypsometrystats_valid(h):
+def assert_hypsometrystats_valid(h):
     assert len(h.zhistogram.counts) == h.zhistogram.bins.num_bins, "Mismatch between num_bins and actual counts"
     assert h.zhistogram.bins.upper_bound >= h.zhistogram.bins.lower_bound, "Upper bound less than lower bound"
     num_bins = (h.zhistogram.bins.upper_bound - h.zhistogram.bins.lower_bound) / h.zhistogram.bins.resolution
