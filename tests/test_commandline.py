@@ -11,6 +11,7 @@ def test_complete(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['complete',
                                  '-mm', 100,
+                                 '-zresolution', 0.1,
                                  '-filter', 'area > 20.5 and maxdepth > 0.5 or volume > 2.5',
                                  '-dem', dtmfile,
                                  '-outdir', str(tmpdir)])
@@ -26,11 +27,16 @@ def test_complete(tmpdir):
     data = v.read_geojson_features()
     assert len(data) == 544, result.output
 
+    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'finalbluespots')
+    data = v.read_geojson_features()
+    assert len(data) == 500, result.output
+
 
 def test_complete_nofilter(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['complete',
                                  '-mm', 100,
+                                 '-zresolution', 0.1,
                                  '-dem', dtmfile,
                                  '-outdir', str(tmpdir)])
     assert result.exit_code == 0, result.output
@@ -43,6 +49,10 @@ def test_complete_nofilter(tmpdir):
     v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'finalstate')
     data = v.read_geojson_features()
     assert len(data) == 587, result.output
+
+    v = io.VectorReader(str(tmpdir.join('malstroem.gpkg')), 'finalbluespots')
+    data = v.read_geojson_features()
+    assert len(data) == 537, result.output
 
 
 def test_filled(tmpdir):
