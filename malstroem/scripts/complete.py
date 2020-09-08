@@ -17,7 +17,8 @@ from builtins import *
 import click
 import click_log
 
-from malstroem import dem as demtool, bluespots, io, streams, rain as raintool, network
+from malstroem import dem as demtool, bluespots, io, streams, rain as raintool, network, hyps, approx
+from malstroem.vector import vectorize_labels_file_io
 from ._utils import parse_filter
 from osgeo import ogr, osr
 import os
@@ -28,13 +29,14 @@ logger = logging.getLogger(__name__)
 @click.command('complete')
 @click.option('-dem', type=click.Path(exists=True), help='DEM raster file. Horisontal and vertical units must be meters')
 @click.option('-outdir', type=click.Path(exists=True), help='Output directory')
-@click.option('-mm', required=True, multiple=False, type=float, help='Rain incident in mm')
+@click.option('-mm', required=True, multiple=False, type=float, help='Rain incident in [mm]')
+@click.option('-zresolution', required=True, type=float, help='Resolution in [m] used when estimating water level for partially filled bluespots')
 @click.option('-accum', is_flag=True, help='Calculate accumulated flow')
 @click.option('-vector', is_flag=True, help='Vectorize bluespots and watersheds')
 @click.option('-filter', help='Filter bluespots by area, maximum depth and volume. Format: '
                                '"area > 20.5 and (maxdepth > 0.05 or volume > 2.5)"')
 @click_log.simple_verbosity_option()
-def process_all(dem, outdir, accum, filter, mm, vector):
+def process_all(dem, outdir, accum, filter, mm, zresolution, vector):
     """Quick option to run all processes.
 
     \b
@@ -61,7 +63,8 @@ def process_all(dem, outdir, accum, filter, mm, vector):
     logger.info('Processing')
     logger.info('   dem: {}'.format(dem))
     logger.info('   outdir: {}'.format(outdir))
-    logger.info('   rain: {}mm'.format(mm))
+    logger.info('   mm: {}mm'.format(mm))
+    logger.info('   zresolution: {}m'.format(zresolution))
     logger.info('   accum: {}'.format(accum))
     logger.info('   filter: {}'.format(filter))
 
@@ -120,3 +123,24 @@ def process_all(dem, outdir, accum, filter, mm, vector):
     calculator = network.FinalStateCalculator(volumes_reader, "inputv", events_writer)
     calculator.process()
 
+    # Hypsometry
+    pourpoints_reader = io.VectorReader(outvector, pourpoint_writer.layername)
+    hyps_writer = io.VectorWriter(ogr_drv, outvector, "hypsometry", None, ogr.wkbNone, dem_reader.crs)
+    hyps.bluespot_hypsometry_io(bluespot_reader, dem_reader, pourpoints_reader, zresolution, hyps_writer)
+
+    # Approximation on levels
+    finalvols_reader = io.VectorReader(outvector, events_writer.layername)
+    hyps_reader = io.VectorReader(outvector, hyps_writer.layername)
+    levels_writer = io.VectorWriter(ogr_drv, outvector, "finallevels", None, ogr.wkbNone, dem_reader.crs)
+    approx.approx_water_level_io(finalvols_reader, hyps_reader, levels_writer)    
+
+    # Approximation on bluespots
+    levels_reader = io.VectorReader(outvector, levels_writer.layername)
+    final_depths_writer = io.RasterWriter(os.path.join(outdir, 'finaldepths.tif'), tr, crs)
+    final_bs_writer = io.RasterWriter(os.path.join(outdir, 'finalbluespots.tif'), tr, crs, 0)
+    approx.approx_bluespots_io(bluespot_reader, levels_reader, dem_reader, final_depths_writer, final_bs_writer)
+
+    # Polygonize final bluespots
+    logger.info("Polygonizing final bluespots")
+    vectorize_labels_file_io(final_bs_writer.filepath, outvector, "finalbluespots", ogr_drv, ogr_dsco, ogr_lco)
+    logger.info("Complete done...")
