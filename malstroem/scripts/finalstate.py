@@ -26,7 +26,7 @@ from malstroem import io, network, approx
 NODATASUBST = -999
 
 
-@click.command('finalvols')
+@click.command('finalvolumes')
 @click.option('-inputvolumes', required=True, help='OGR datasource containing nodes layer with model input water volumes')
 @click.option('-inputvolumes_layer', default='initvolumes', show_default=True, help='Layer name')
 @click.option('--attribute', '-a', default='inputv', type=str, help='Attribute containing the model input water volume in [m3]')

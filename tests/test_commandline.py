@@ -170,7 +170,7 @@ def test_initvolumes(tmpdir):
 def test_finalvols(tmpdir):
     runner = CliRunner()
     out_file = str(tmpdir.join("finalvolumes.shp"))
-    result = runner.invoke(cli, ['finalvols',
+    result = runner.invoke(cli, ['finalvolumes',
                                  '-inputvolumes', initvolsfile,
                                  '-out', str(tmpdir)])
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
@@ -316,7 +316,7 @@ def test_chained(tmpdir):
     assert os.path.isfile(initvolumes)
 
     # Network
-    result = runner.invoke(cli, ['finalvols',
+    result = runner.invoke(cli, ['finalvolumes',
                                  '-inputvolumes', str(tmpdir),
                                  '-out', str(tmpdir)])
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
