@@ -48,10 +48,10 @@ def approx_water_level_io(finalvols_reader, hyps_reader, levels_writer):
 
         zmin = h["hyps"].zmin
         zmax = h["hyps"].zmax
-        # Is it completely filled?
+        max_vol = h["max_vol"]
         water_level = None
-        if final_vol / h["max_vol"] > 0.9999:
-            # waterlevel is the maximum passoible in this bluespot
+        if max_vol == 0 or final_vol / max_vol > 0.9999:
+            # waterlevel is the maximum possible in this bluespot
             water_level = h["hyps"].zmin + h["max_depth"]
         else:
             # Calculate estimate
@@ -60,7 +60,7 @@ def approx_water_level_io(finalvols_reader, hyps_reader, levels_writer):
             # Z value of centre of each histogram bin
             binsz = _bin_waterlevel_z(h["hyps"].zhistogram.bins)
             # Replace bounds with acutal values. Zero volume at zmin and max_volume at zmax
-            volumes = np.concatenate(([0.0], cum_vol[1:-1], [h["max_vol"]]))
+            volumes = np.concatenate(([0.0], cum_vol[1:-1], [max_vol]))
             z = np.concatenate(([zmin], binsz[1:-1], [zmax])) 
             # Now interpolate for final_vol
             water_level = np.interp([final_vol], volumes, z)[0]
