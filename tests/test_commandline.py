@@ -10,8 +10,7 @@ import os
 def test_complete(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['complete',
-                                 #'-r', 10,
-                                 '-r', 100,
+                                 '-mm', 100,
                                  '-filter', 'area > 20.5 and maxdepth > 0.5 or volume > 2.5',
                                  '-dem', dtmfile,
                                  '-outdir', str(tmpdir)])
@@ -31,8 +30,7 @@ def test_complete(tmpdir):
 def test_complete_nofilter(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['complete',
-                                 #'-r', 10,
-                                 '-r', 100,
+                                 '-mm', 100,
                                  '-dem', dtmfile,
                                  '-outdir', str(tmpdir)])
     assert result.exit_code == 0, result.output
