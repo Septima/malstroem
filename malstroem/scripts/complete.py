@@ -28,18 +28,18 @@ logger = logging.getLogger(__name__)
 @click.command('complete')
 @click.option('-dem', type=click.Path(exists=True), help='DEM raster file. Horisontal and vertical units must be meters')
 @click.option('-outdir', type=click.Path(exists=True), help='Output directory')
-@click.option('--rain', '-r', required=True, multiple=False, type=float, help='Rain incident in mm')
+@click.option('-mm', required=True, multiple=False, type=float, help='Rain incident in mm')
 @click.option('-accum', is_flag=True, help='Calculate accumulated flow')
 @click.option('-vector', is_flag=True, help='Vectorize bluespots and watersheds')
 @click.option('-filter', help='Filter bluespots by area, maximum depth and volume. Format: '
                                '"area > 20.5 and (maxdepth > 0.05 or volume > 2.5)"')
 @click_log.simple_verbosity_option()
-def process_all(dem, outdir, accum, filter, rain, vector):
+def process_all(dem, outdir, accum, filter, mm, vector):
     """Quick option to run all processes.
 
     \b
     Example:
-    malstroem complete -r 10 -r 30 -filter "volume > 2.5" -dem dem.tif -outdir ./outdir/
+    malstroem complete -mm 20 -filter "volume > 2.5" -dem dem.tif -outdir ./outdir/
     """
     # Check that outdir exists and is empty
     if not os.path.isdir(outdir) or not os.path.exists(outdir) or os.listdir(outdir):
@@ -61,7 +61,7 @@ def process_all(dem, outdir, accum, filter, rain, vector):
     logger.info('Processing')
     logger.info('   dem: {}'.format(dem))
     logger.info('   outdir: {}'.format(outdir))
-    logger.info('   rain: {}mm'.format(rain))
+    logger.info('   rain: {}mm'.format(mm))
     logger.info('   accum: {}'.format(accum))
     logger.info('   filter: {}'.format(filter))
 
@@ -111,7 +111,7 @@ def process_all(dem, outdir, accum, filter, rain, vector):
     # Calculate volumes
     nodes_reader = io.VectorReader(outvector, nodes_writer.layername)
     volumes_writer = io.VectorWriter(ogr_drv, outvector, 'initvolumes', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco) 
-    rain_tool = raintool.SimpleVolumeTool(nodes_reader, volumes_writer, "inputv" ,rain)
+    rain_tool = raintool.SimpleVolumeTool(nodes_reader, volumes_writer, "inputv" ,mm)
     rain_tool.process()
 
     # Process final state

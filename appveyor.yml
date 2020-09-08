@@ -44,7 +44,7 @@ after_test:
   # Check that malstroem.exe works
   - conda deactivate
   - ps: md test_outdir
-  - ps: dist/malstroem complete -dem tests/data/dtm.tif -outdir test_outdir -r 10
+  - ps: dist/malstroem complete -dem tests/data/dtm.tif -outdir test_outdir -mm 10
 
 artifacts:
   - path: dist\*
