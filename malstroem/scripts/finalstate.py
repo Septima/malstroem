@@ -108,7 +108,7 @@ def process_bluespots(bluespots, dem, finallevels, finallevels_layer, out_depths
     dem_reader = io.RasterReader(dem, nodatasubst=-999)
     levels_reader = io.VectorReader(finallevels, finallevels_layer)
 
-    depths_writer = io.RasterWriter(str(out_depths), bspot_reader.transform, bspot_reader.crs)
-    final_bs_writer = io.RasterWriter(str(out_bluespots), bspot_reader.transform, bspot_reader.crs, nodata=0)
+    depths_writer = io.RasterWriter(str(out_depths), bspot_reader.transform, bspot_reader.crs) if out_depths else None
+    final_bs_writer = io.RasterWriter(str(out_bluespots), bspot_reader.transform, bspot_reader.crs, nodata=0) if out_bluespots else None
 
     approx.approx_bluespots_io(bspot_reader, levels_reader, dem_reader, depths_writer, final_bs_writer)
