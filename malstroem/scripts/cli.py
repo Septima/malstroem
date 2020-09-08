@@ -60,6 +60,7 @@ cli.add_command(dem.process_accum)
 cli.add_command(bluespot.process_bspots)
 cli.add_command(bluespot.process_wsheds)
 cli.add_command(bluespot.process_pourpoints)
+cli.add_command(bluespot.process_polys)
 
 # stream
 cli.add_command(stream.process_network)

@@ -85,3 +85,41 @@ def vectorize_labels_file(labeled_file, id_attribute='bspot_id'):
     del fd
     del src_ds
     del mem_ds
+
+def vectorize_labels_file_io(labeled_file, out_ds, out_layer, out_format, out_dsco=[], out_lco=[], id_attribute='bspot_id', quiet=False):
+    # This method does exactly the same as could be done with gdal_polygonize.py
+
+    src_ds = gdal.Open(labeled_file)
+    src_band = src_ds.GetRasterBand(1)
+
+    # Create a memory OGR datasource to put results in.
+    try:
+        gdal.PushErrorHandler('CPLQuietErrorHandler')
+        dst_ds = ogr.Open(out_ds, update=1)
+        gdal.PopErrorHandler()
+    except:
+        dst_ds = None
+    
+    if not dst_ds:
+        dst_drv = ogr.GetDriverByName(out_format)
+        dst_ds = dst_drv.CreateDataSource(out_ds, options = out_dsco)
+
+    srs = src_ds.GetSpatialRef()
+    dst_layer = dst_ds.CreateLayer(out_layer, geom_type=ogr.wkbPolygon, srs=srs, options=out_lco)
+
+    fd = ogr.FieldDefn(id_attribute, ogr.OFTInteger)
+    dst_layer.CreateField(fd)
+
+    # Use 8-connectedness
+    options = ['8CONNECTED=8']
+
+    # run the algorithm.
+    if quiet:
+        progress_callback = None
+    else:
+        progress_callback = gdal.TermProgress_nocb
+    result = gdal.Polygonize(src_band, src_band.GetMaskBand(), dst_layer, 0, options, callback=progress_callback)
+
+    src_band = None
+    src_ds = None
+    dst_ds = None
