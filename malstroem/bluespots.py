@@ -158,21 +158,24 @@ class BluespotTool(object):
         depths = self.input_depths.read()
         raw_labeled, raw_nlabels = label.connected_components(depths)
         raw_bluespot_stats = label.label_stats(depths, raw_labeled)
-        self.logger.info("Number of bluespots found before filtering: {}".format(raw_nlabels))
+        if not self.input_bluespot_filter_function:
+            self.logger.info("Final number of bluespots (No filter specified): {}".format(raw_nlabels))
+            self.output_labeled_raster.write(raw_labeled)
+        else:
+            self.logger.info("Number of bluespots found before filtering: {}".format(raw_nlabels))
+            self.logger.info("Calculating filtered bluespots")
+            # Run filter function and get list of bools indicating which labels to keep
+            keepers = filterbluespots(self.input_bluespot_filter_function, cell_area, raw_bluespot_stats)
 
-        self.logger.info("Calculating filtered bluespots")
-        # Run filter function and get list of bools indicating which labels to keep
-        keepers = filterbluespots(self.input_bluespot_filter_function, cell_area, raw_bluespot_stats)
-
-        new_components = label.keep_labels(raw_labeled, keepers)
-        del raw_labeled
-        # Filtered bluespots
-        labeled, nlabels = label.connected_components(new_components)
-        # Recalculate stats on filtered bluespots
-        bluespot_stats = label.label_stats(depths, labeled)
-        del depths
-        self.logger.info("Number of bluespots left after filtering: {}".format(nlabels))
-        self.output_labeled_raster.write(labeled)
+            new_components = label.keep_labels(raw_labeled, keepers)
+            del raw_labeled
+            # Filtered bluespots
+            labeled, nlabels = label.connected_components(new_components)
+            # Recalculate stats on filtered bluespots
+            bluespot_stats = label.label_stats(depths, labeled)
+            del depths
+            self.logger.info("Number of bluespots left after filtering: {}".format(nlabels))
+            self.output_labeled_raster.write(labeled)
 
         if self.output_labeled_vector:
             self.logger.info("Vectorizing bluespots")
