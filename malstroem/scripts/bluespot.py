@@ -23,6 +23,7 @@ import click_log
 
 from malstroem import io
 from malstroem.bluespots import filterbluespots, assemble_pourpoints
+from malstroem.vector import vectorize_labels_file_io
 from ._utils import parse_filter
 from malstroem.algorithms import label, flow, fill
 from osgeo import ogr
@@ -141,3 +142,25 @@ def process_pourpoints(bluespots, depths, watersheds, dem, accum, out, format, l
 
     feature_collection = dict(type="FeatureCollection", features=pour_points)
     pourpnt_writer.write_geojson_features(feature_collection)
+
+
+@click.command('bspolys')
+@click.option('-bluespots', required=True, type=click.Path(exists=True), help='Bluespot ID file')
+@click.option('-out', required=True, type=str, help='Output OGR datasource')
+@click.option('-format', type=str, default='ESRI shapefile', help='OGR format. See OGR documentation')
+@click.option('-layername', type=str, default='bluespots', show_default=True, help='Output layer name')
+@click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
+@click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
+def process_polys(bluespots, out, format, layername, dsco, lco):
+    """Polygonize bluespots.
+
+    Create vector polygons for all connected regions of cells in the raster sharing a common bluespot ID.
+    Note that partially filled bluespots may have disconnected regions and hence there may be more than one polygon
+    with the same bluespot ID.
+
+    For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
+    """
+    vectorize_labels_file_io(bluespots, out, layername, format, dsco, lco)
+    
+
+
