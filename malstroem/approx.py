@@ -36,7 +36,8 @@ def approx_water_level_io(finalvols_reader, hyps_reader, levels_writer):
         max_depth = float(props["bspot_dmax"])
         max_vol = float(props["bspot_vol"])
         return {"bspot_id":bsid, "hyps":hyps, "cell_area": cell_area, "max_depth": max_depth, "max_vol": max_vol}
-
+    
+    logger.info("Calculating approximate bluespot water levels using hypsometric histograms")
     hyps_index = {int(gjn['properties']['bspot_id']): gjn for gjn in hyps_reader.read_geojson_features()}
     bspot_finalstate_features = [x for x in finalvols_reader.read_geojson_features() if x["properties"]["nodetype"] == "pourpoint"]
     for bspot_finalstate in bspot_finalstate_features:
@@ -68,6 +69,7 @@ def approx_water_level_io(finalvols_reader, hyps_reader, levels_writer):
         props["approx_z"] = float(water_level)
         props["approx_dmax"] = float(water_level) - zmin
 
+    logger.info("Writing approximate bluespot water levels")
     levels_writer.write_geojson_features(bspot_finalstate_features)
 
 def approx_bluespots_io(
@@ -90,17 +92,17 @@ def approx_bluespots_io(
     logger.info("Reading bluespot labels")
     bluespot_labels = bluespot_labels_reader.read()
 
-    logger.info("Set water levels")
+    logger.info("Setting water levels")
     # Make raster with bluespot labels replaced by their water level Z 
     # This raster may have cells where water level z is below terrain z
     maxextent_waterlevel = set_label_to_value(bluespot_labels, value_list)
     # Conserve memory
     del bluespot_labels
 
-    logger.info("Read DEM")
+    logger.info("Reading DEM")
     dem = dem_reader.read()
 
-    logger.info("Calculate depths")
+    logger.info("Calculating depths")
     # subtract dem to get depths (we get negative depths where bluespot water level is below ground)
     depths = maxextent_waterlevel - dem
     del dem
@@ -110,7 +112,7 @@ def approx_bluespots_io(
     depths[below] = 0
 
     if approx_depths_writer:
-        logger.info("Write approximate depths")
+        logger.info("Writing approximate depths")
         approx_depths_writer.write(depths)
 
     del depths
