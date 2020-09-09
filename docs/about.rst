@@ -24,8 +24,8 @@ raster processing and geometric networks. Submitted to Computers & Geosciences, 
 
 Bugs and contributions
 ----------------------
-- Please report issues using the `issue tracker <https://github.com/Kortforsyningen/malstroem/issues>`_.
-- Contributions are welcome at the `project home <https://github.com/Kortforsyningen/malstroem/>`_.
+- Please report issues using the `issue tracker <https://github.com/Septima/malstroem/issues>`_.
+- Contributions are welcome at the `project home <https://github.com/Septima/malstroem>`_.
 
 If you are not familiar with GitHub please read this short `guide <https://guides.github.com/activities/contributing-to-open-source/>`_.
 
@@ -35,7 +35,7 @@ License
 
 .. code-block:: text
 
-   Copyright (c) 2016
+   Copyright (c) 2020
    Developed by Septima.dk and Thomas Balstrøm (University of Copenhagen) for the Danish Agency for
    Data Supply and Efficiency. This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by the Free Software Foundation,

@@ -1,6 +1,110 @@
 Installation
 ============
-Theoretically:
+It is a bit tricky to get malstroem correctly installed. Use the precompiled Windows binary if you are on Windows, otherwise install using Anaconda.
+
+Installing on Linux
+-------------------
+Use Anaconda installation if possible. Otherwise pip has been shown to work on some distributions.
+
+Windows
+-------
+If you are not going to write your own python program using malstroem you can just download the precompiled standalone executable.
+
+Download `malstroem.exe` from `releases <https://github.com/Septima/malstroem/releases>`_.
+
+This file includes everything needed to run malstroem from a command prompt. You don't need to install anything else. Not even python.
+
+Installing on Windows
+---------------------
+
+These instructions are for Python v2.7 64bit. Change accordingly if you prefer another version of Python.
+
+1. Install `Microsoft Visual C++ 14.2 standalone: Build Tools for Visual Studio 2019` as described `here <https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.2_standalone:_Build_Tools_for_Visual_Studio_2019_.28x86.2C_x64.2C_ARM.2C_ARM64.29>`_.
+
+2. Download and install `miniconda3 64bit <https://docs.conda.io/en/latest/miniconda.html>`_ for Windows. (If you have other versions of python installed on your system, make sure to untick \"Register Anaconda as my default Python\")
+
+3. Download the malstroem dependencies file `environment.yml <https://github.com/Septima/malstroem/raw/master/environment.yml>`_. Note the path to the downloaded file like ``C:\\Users\\asger\\Downloads\\environment.yml``.
+
+4. From the start menu, search for and open ``Anaconda Prompt``.
+
+5. In the Anaconda Prompt run
+
+.. code-block:: console
+
+   conda env create -f C:\Users\asger\Downloads\environment.yml
+
+Where ``C:\Users\asger\Downloads\environment.yml`` is the path to your downloaded copy of ``environment.yml``.
+
+6. In the Anaconda Prompt run
+
+.. code-block:: console
+
+   conda activate malstroem
+
+This activates the ``malstroem`` environment in the current prompt. Your prompt should show something like
+
+.. code-block:: console
+
+   (malstroem) C:\Users\asger>
+
+Indicating that ``malstroem`` is the currently active environment.
+
+7. Install ``malstroem`` into the environment by running
+
+.. code-block:: console
+
+   pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
+
+8. Still in the Anaconda Prompt check that malstroem responds to
+
+.. code-block:: console
+
+   malstroem --help
+
+
+Installing on Mac OSX
+---------------------
+1. Download and install `miniconda3 64bit <https://docs.conda.io/en/latest/miniconda.html>`_ for MacOSX.
+
+2. Download the malstroem dependencies file `environment.yml <https://github.com/Septima/malstroem/raw/master/environment.yml>`_.
+
+3. In a terminal run
+
+.. code-block:: console
+
+   conda env create -f path/to/environment.yml
+
+Where ``path/to/environment.yml`` is the path to your downloaded copy of ``environment.yml``.
+
+4. Run
+
+.. code-block:: console
+
+   conda activate malstroem
+
+This activates the ``malstroem`` environment in the current prompt. Your prompt should show something like
+
+.. code-block:: console
+
+   (malstroem) ~$
+
+Indicating that ``malstroem`` is the currently active environment.
+
+5. Install ``malstroem`` into the environment by running
+
+.. code-block:: console
+
+   pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
+
+6. Still in the Anaconda Prompt check that malstroem responds to
+
+.. code-block:: console
+
+   malstroem --help
+
+Install using pip
+-----------------
+Theoretically it should be possible to install malstroem using pip:
 
 .. code-block:: console
 
@@ -10,71 +114,3 @@ Theoretically:
 
 Unfortunately the above doesn't work on all platforms as malstroem uses som third party libraries and has some
 optimized code which needs to be compiled for each platform.
-
-Installing on Linux
--------------------
-Theory is reality:
-
-.. code-block:: console
-
-   pip install cython numpy scipy gdal
-   pip install git+https://github.com/Kortforsyningen/malstroem.git[speedups]
-
-
-Installing on Windows
----------------------
-
-These instructions are for Python v2.7 64bit. Change accordingly if you prefer another version of Python.
-
-1. `Download <https://www.python.org/downloads/windows/>`_ and install latest Python 2.7 "Windows x86-64 MSI installer"
-2. `Download <https://www.microsoft.com/en-us/download/details.aspx?id=44266>`_ and install "Microsoft Visual C++
-   Compiler for Python 2.7"
-3. Go to `Christoph Gohlke <http://www.lfd.uci.edu/~gohlke/pythonlibs/>`_ and download `numpy`, `gdal` and `scipy`
-   wheels matching your python. For Python 2.7 64 bit it should be files ending in `cp27‑cp27m‑win_amd64.whl`
-4. Open windows command prompt and go to the scripts folder in your Python installation. In a defaut install it should
-   be something like
-
-.. code-block:: console
-
-   cd c:\Python27\scripts
-
-
-5. For each of the 3 wheel files downloaded from Gholke (starting with `numpy`) install it with pip like this:
-
-.. code-block:: console
-
-   pip install c:\downloads\numpy‑1.11.3+mkl‑cp27‑cp27m‑win_amd64.whl
-
-
-6. Now (finally) install malstroem
-
-.. code-block:: console
-
-   pip install git+https://github.com/Kortforsyningen/malstroem.git[speedups]
-
-
-7. Still in the scripts folder of your Python (c:\python27\scripts) check that malstroem responds to
-
-.. code-block:: console
-
-   malstroem --help
-
-
-Installing on Mac OSX
----------------------
-The biggest problem on OSX is getting GDAL to work. One known solution is via `homebrew <http://brew.sh/>`_:
-
-1. Make sure homebrew is installed and you know how to use its Python (See for instance `this guide <http://docs.python-guide.org/en/latest/starting/install/osx/>`_)
-2. Install GDAL and its Python bindings
-
-.. code-block:: console
-
-   brew install gdal
-
-3. Make sure you use the homebrew Python and install malstroem and its dependencies (If you are using a virtualenv
-   create it using `--system-site-packages`)
-
-.. code-block:: console
-
-   pip install cython numpy scipy
-   pip install git+https://github.com/Kortforsyningen/malstroem.git[speedups]
