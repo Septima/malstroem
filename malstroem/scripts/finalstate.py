@@ -27,7 +27,7 @@ NODATASUBST = -999
 
 
 @click.command('finalvolumes')
-@click.option('-inputvolumes', required=True, help='OGR datasource containing nodes layer with model input water volumes')
+@click.option('-inputvolumes', required=True, help='OGR datasource containing model input water volume per node in [m3]')
 @click.option('-inputvolumes_layer', default='initvolumes', show_default=True, help='Layer name')
 @click.option('--attribute', '-a', default='inputv', type=str, help='Attribute containing the model input water volume in [m3]')
 @click.option('-out', required=True, help='Output OGR datasource')
@@ -43,7 +43,7 @@ def process_net(inputvolumes, inputvolumes_layer, attribute, out, out_layer, for
 
     \b
     Example:
-    malstroem net -volumes results.gpkg -out results.gpkg -format gpkg
+    malstroem finalvolumes -inputvolumes results.gpkg -out results.gpkg -format gpkg
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
@@ -98,7 +98,7 @@ def process_finallevels(finalvols, finalvols_layer, hyps, hyps_layer, out, out_l
 @click.option('-out_bluespots', required=False, type=click.Path(exists=False), help='Output file (approximated bluespots)')
 @click_log.simple_verbosity_option()
 def process_bluespots(bluespots, dem, finallevels, finallevels_layer, out_depths, out_bluespots):
-    """Approximate extent and depths of bluespots in the final state.
+    """Approximate extent and depths rasters of bluespots in the final state.
 
     """
     if not out_depths and not out_bluespots:

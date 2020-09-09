@@ -144,17 +144,18 @@ def process_pourpoints(bluespots, depths, watersheds, dem, accum, out, format, l
     pourpnt_writer.write_geojson_features(feature_collection)
 
 
-@click.command('bspolys')
-@click.option('-bluespots', required=True, type=click.Path(exists=True), help='Bluespot ID file')
+@click.command('polys')
+@click.option('-raster', required=True, type=click.Path(exists=True), help='Raster file with IDs (bluespots or watersheds)')
 @click.option('-out', required=True, type=str, help='Output OGR datasource')
 @click.option('-format', type=str, default='ESRI shapefile', help='OGR format. See OGR documentation')
-@click.option('-layername', type=str, default='bluespots', show_default=True, help='Output layer name')
+@click.option('-layername', type=str, default='polygonized', show_default=True, help='Output layer name')
 @click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
 @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
 def process_polys(bluespots, out, format, layername, dsco, lco):
-    """Polygonize bluespots.
+    """Polygonize ID raster.
 
-    Create vector polygons for all connected regions of cells in the raster sharing a common bluespot ID.
+    Create vector polygons for all connected regions of cells in the raster sharing a common ID.
+    
     Note that partially filled bluespots may have disconnected regions and hence there may be more than one polygon
     with the same bluespot ID.
 

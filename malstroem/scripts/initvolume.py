@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 @click.option('-nodes', required=True, help='OGR datasource containing nodes layer')
 @click.option('-nodes_layer', default='nodes', show_default=True, help='Nodes layer name ')
 @click.option('-mm', required=False, type=float, help='Evenly distributed rain event [mm]. Mutually exlcusive with -pr')
-@click.option('-pr', required=False, type=click.Path(exists=True), help='Raster specifying input water. Mutually exlcusive with -mm')
+@click.option('-pr', required=False, type=click.Path(exists=True), help='Raster specifying input water. Mutually exlcusive with -mm. Must have same resolution and extent as -bluespots raster')
 @click.option('-pr_unit', 
     default="mm", 
     show_default=True, 
@@ -53,7 +53,7 @@ def process_volumes(nodes, nodes_layer, mm, pr, pr_unit, bluespots, out, out_lay
     \b
     Examples:
     malstroem rain -mm 10 -nodes results.gpkg -out results.gpkg -format gpkg
-    malstroem rain -pr precip_raster.tif -nodes results.gpkg -out results.gpkg -format gpkg
+    malstroem rain -pr precip_raster.tif -bluespots bluespots.tif -nodes results.gpkg -out results.gpkg -format gpkg
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
