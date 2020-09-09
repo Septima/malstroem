@@ -151,7 +151,7 @@ def process_pourpoints(bluespots, depths, watersheds, dem, accum, out, format, l
 @click.option('-layername', type=str, default='polygonized', show_default=True, help='Output layer name')
 @click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
 @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
-def process_polys(bluespots, out, format, layername, dsco, lco):
+def process_polys(raster, out, format, layername, dsco, lco):
     """Polygonize ID raster.
 
     Create vector polygons for all connected regions of cells in the raster sharing a common ID.
@@ -161,7 +161,7 @@ def process_polys(bluespots, out, format, layername, dsco, lco):
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
-    vectorize_labels_file_io(bluespots, out, layername, format, dsco, lco)
+    vectorize_labels_file_io(raster, out, layername, format, dsco, lco)
     
 
 
