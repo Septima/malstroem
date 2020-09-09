@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 @click.option('-dem', type=click.Path(exists=True), help='DEM raster file. Horisontal and vertical units must be meters')
 @click.option('-outdir', type=click.Path(exists=True), help='Output directory')
 @click.option('-mm', required=True, multiple=False, type=float, help='Rain incident in [mm]')
-@click.option('-zresolution', required=True, type=float, help='Resolution in [m] used when estimating water level for partially filled bluespots')
+@click.option('-zresolution', required=True, type=float, help='Resolution in [m] when collecting statistics used for estimating water level for partially filled bluespots')
 @click.option('-accum', is_flag=True, help='Calculate accumulated flow')
 @click.option('-vector', is_flag=True, help='Vectorize bluespots and watersheds')
 @click.option('-filter', help='Filter bluespots by area, maximum depth and volume. Format: '
@@ -41,7 +41,7 @@ def process_all(dem, outdir, accum, filter, mm, zresolution, vector):
 
     \b
     Example:
-    malstroem complete -mm 20 -filter "volume > 2.5" -dem dem.tif -outdir ./outdir/
+    malstroem complete -mm 20 -filter "volume > 2.5" -dem dem.tif  -zresolution 0.1 -outdir ./outdir/
     """
     # Check that outdir exists and is empty
     if not os.path.isdir(outdir) or not os.path.exists(outdir) or os.listdir(outdir):

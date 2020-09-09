@@ -39,16 +39,16 @@ logger = logging.getLogger(__name__)
     help="Unit of cell values in '-pr' raster")
 @click.option('-bluespots', required=False, type=click.Path(exists=True), help='Bluespots ID file. Required with -pr')    
 @click.option('-out', required=True, help='Output OGR datasource')
-@click.option('-out_layer', default='initvolumes', show_default=True, help='Calculated model input volumes in  [m3]')
+@click.option('-out_layer', default='initvolumes', show_default=True, help='Calculated model input volumes in [m3]')
 @click.option('-out_attribute', default='inputv', show_default=True, help='Name of output attribute')
 @click.option('-format', type=str, default='ESRI shapefile', help='OGR driver. See OGR documentation')
 @click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
 @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
 @click_log.simple_verbosity_option()
 def process_volumes(nodes, nodes_layer, mm, pr, pr_unit, bluespots, out, out_layer, out_attribute, format, dsco, lco):
-    """Calculate initial water volumes for each watershed.
+    """Set up initial water volumes for each watershed.
 
-    The output from this process can be used as input for the network calculation.
+    The output from this process can be used as input for the finalvolumes calculation.
 
     \b
     Examples:
