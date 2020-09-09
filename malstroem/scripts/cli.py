@@ -35,14 +35,14 @@ def cli():
     """Calculate simple hydrologic models.
 
     To create rainfall scenarios use either the sub command 'complete' or the following sequence of sub command calls:
-    filled, depths, flowdir, [accum], bspots, wsheds, pourpts, network, initvolumes, finalvolumes, hyps, finallevels
+    filled, depths, flowdir, [accum], bspots, wsheds, pourpts, network, hyps, initvolumes, finalvolumes, finallevels
     and finalbluespots.
 
     To get help for a sub command use: malstroem subcommand --help
 
     \b
     Examples:
-    malstroem complete -mm 20 -filter 'volume > 2.5' -dem dem.tif -outdir ./outdir/
+    malstroem complete -mm 20 -filter 'volume > 2.5' -dem dem.tif -outdir ./outdir/ -zresolution 0.1
     malstroem filled -dem dem.tif -out filled.tif
 
     """
