@@ -1,7 +1,7 @@
 ========================
 Command Line Users Guide
 ========================
-malstroem's command line is a single program named ``malstroem`` which has a number og subcommands. Each subcommand
+malstroem's command line is a single program named ``malstroem`` which has a number of subcommands. Each subcommand
 exposes a malstroem process.
 
 Available subcommands can be seen by invoking ``malstroem --help``
@@ -14,31 +14,38 @@ Available subcommands can be seen by invoking ``malstroem --help``
       Calculate simple hydrologic models.
 
       To create rainfall scenarios use either the sub command 'complete' or the
-      following sequence of sub command calls: filled, depths, flowdir, bspots,
-      wsheds, pourpts, network, rain.
+      following sequence of sub command calls: filled, depths, flowdir, [accum],
+      bspots, wsheds, pourpts, network, hyps, initvolumes, finalvolumes,
+      finallevels and finalbluespots.
 
       To get help for a sub command use: malstroem subcommand --help
 
       Examples:
-      malstroem complete -r 10 -r 30 -filter "volume > 2.5" -dem dem.tif -outdir ./outdir/
+      malstroem complete -mm 20 -filter 'volume > 2.5' -dem dem.tif -outdir ./outdir/ -zresolution 0.1
       malstroem filled -dem dem.tif -out filled.tif
 
     Options:
       --version            Show the version and exit.
       -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
+      --version            Show the version and exit.
       --help               Show this message and exit.
 
     Commands:
-      accum     Calculate accumulated flow.
-      bspots    Label bluespots.
-      complete  Quick option to complete process.
-      depths    Calculate bluespot depths.
-      filled    Create a filled (depressionless) DEM.
-      flowdir   Calculate surface water flow directions.
-      network   Calculate stream network between bluespots.
-      pourpts   Determine pour points.
-      rain      Calculate bluespot fill and spill volumes for...
-      wsheds    Calculate bluespot watersheds.
+      accum           Calculate accumulated flow.
+      bspolys         Polygonize bluespots.
+      bspots          Label bluespots.
+      complete        Quick option to run all processes.
+      depths          Calculate bluespot depths.
+      filled          Create a filled (depressionless) DEM.
+      finalbluespots  Approximate extent and depths of bluespots in the final...
+      finallevels     Approximate water levels of bluespots in the final state.
+      finalvolumes    Bluespot fill and stream network volumes in the final...
+      flowdir         Calculate surface water flow directions.
+      hyps            Statistical terrain elevation measures for each bluespot.
+      initvolumes     Set up initial water volumes for each watershed.
+      network         Calculate stream network between bluespots.
+      pourpts         Determine pour points.
+      wsheds          Bluespot watersheds.
 
 Help for a given subcommand is available by invoking ``malstroem subcommand --help``. For example:
 
@@ -65,7 +72,7 @@ malstroem makes the following assumptions regarding the input
  * DEM horisontal and vertical units are meters.
  * All subsequent processing steps assume input data as output by the former processing step of malstroem.
 
-malstroems generally does not do very much checking that input makes sense together.
+malstroems generally does not do very much checking that input make sense together.
 
 Vector output options
 ---------------------
@@ -84,18 +91,20 @@ For documentation of OGR features see the documentation of
 Raster output options
 ---------------------
 malstroem uses `GDAL <http://www.gdal.org>`_ for writing raster data. All raster data are written in
-`GeoTiff <http://www.gdal.org/frmt_gtiff.html>`_ format.
+`GeoTiff <http://www.gdal.org/frmt_gtiff.html>`_ format using relevant compression.
 
 malstroem complete
 ------------------
-The ``complete`` subcommand gives you fast-track processing from input DEM to output rain incidents including most
+The ``complete`` subcommand gives you fast-track processing from input DEM to output rain incident including most
 intermediate datasets. It basically collects the subcommands ``filled``, ``depths``, ``flowdir``, ``accum``,
-``bspots``, ``wsheds``, ``pourpts``, ``network`` and ``rain`` into one single subcommand. See these subcommands to learn
-more about what happens or see `Complete chain of processes`_.
+``bspots``, ``wsheds``, ``pourpts``, ``network``, ``hyps``, ``initvolumes``, ``finalvolumes``, ``finallevels``
+and ``finalbluespots`` into one single subcommand. See these subcommands to learn more about what happens or 
+see `Complete chain of processes`_.
 
 Arguments:
  * ``dem`` is a raster digital elevation model. Both horisontal and vertical units must be meters.
- * ``r`` or ``rain`` One or more rain incidents to calculate. In mm. ``-r value`` can be specified multiple times.
+ * ``mm`` Rain incident to calculate. In mm.
+ * ``zresolution`` Resolution in [m] when collecting statistics used for estimating water level for partially filled bluespots.
  * If ``accum`` is specified the accumulated flow is calculated. This takes some time and is not strictly required.
  * If ``vector`` is specified the bluespots and watersheds are vectorized. This takes some time and is not required.
  * ``filter`` allows ignoring bluespots based on their area, maximum depth and volume.
@@ -109,7 +118,7 @@ Example:
 
 .. code-block:: console
 
-    $ malstroem complete -r 10 -r 30 -filter "volume > 2.5" -dem dem.tif -outdir ./outdir/
+    $ malstroem complete -mm 20 -filter "volume > 2.5" -dem dem.tif -zresolution 0.1 -outdir ./outdir/
 
 malstroem filled
 ----------------
@@ -234,7 +243,7 @@ Arguments:
  * ``filter`` allows ignoring bluespots based on their area, maximum depth and volume.
    Format: ``area > 20.5 and (maxdepth > 0.05 or volume > 2.5)``.
    Bluespots that do not pass the filter are ignored in all subsequent calculations. For instance their capacity is
-   not taken into account.`
+   not taken into account.
 
 Outputs:
  * A raster with bluespot IDs. The ID 0 (zero) is used for cells which do not belong to a bluespot.
@@ -317,7 +326,7 @@ Example:
 
 .. code-block:: console
 
-    $ malstroem pourpts -bluespots bluespots.tif -depths depths.tif -watersheds wsheds.tif -dem dem.tif -out shpdir/ -layername pourpoints
+    $ malstroem pourpts -bluespots bluespots.tif -depths depths.tif -watersheds wsheds.tif -dem dem.tif -out results.gpkg -layername pourpoints -format gpkg
 
 malstroem network
 -----------------
@@ -392,26 +401,32 @@ Example:
 
 .. code-block:: console
 
-    $ malstroem network -bluespots bluespots.tif -flowdir flowdir.tif -pourpoints shpdir/pourpoints.shp -out shpdir/ -out_nodes_layer nodes -out_streams_layer streams
+    $ malstroem network -bluespots bluespots.tif -flowdir flowdir.tif -pourpoints results.gpkg -pourpoints_layer pourpoints -out results.gpkg -out_nodes_layer nodes -out_streams_layer streams -format gpkg
 
-malstroem rain
---------------
-The subcommand ``rain`` calculates bluespot fill and spill volumes for specific rain events.
+malstroem initvolumes
+---------------------
+The subsommcand ``initvolumes`` sets up model input volumes for each watershed.
 
-For each rain event bluespot fill and spill volumes are calculated for all nodes and spill is propagated downstream.
+Water volumes are based on one of two methods:
+ 1. A spatially homogenuous rain incident of X mm added at all cells.
+ 2. A raster which specifies the amount of water added into the model at each cell. This raster may specify the amount in either mm, litres or m3.
+
+Note:  The output from this process can be used as input for the ``finalvolumes`` process.
 
 Arguments:
  * ``nodes`` OGR datasource containing nodes layer.
  * ``nodes_layer`` layer name within `nodes` datasource. Needed when datasource can have multiple layers (eg. a database).
- * ``r`` or ``rain`` is a rain incident in mm. Note that multiple rain incidents can be calculated at once by repeating
-   the '-r' option.
+ * ``mm`` Calculate volumes from a homogenuous rain incident in [mm]. Mutually exclusive with ``pr``
+ * ``pr`` Raster specifying input water. Mutually exclusive with ``mm``
+ * ``pr_unit`` Unit of cell values in -pr raster.
+ * ``bluespots`` bluespots ID raster.
  * ``out`` output OGR datasource.
  * ``out_layer`` layer name for output layer within the output datasource.
 
 Outputs:
- * Events Point layer where fill and spill has been calculated for all nodes
+ * Initvolumes Point layer which is a copy of the input ``nodes`` layer supplied with summed volume of water on each watershed in the ``inputv`` attribute.  
 
-.. list-table:: **Events attributes**
+.. list-table:: **Initvolumes attributes**
    :header-rows: 1
 
    * - Attribute Name
@@ -434,29 +449,246 @@ Outputs:
      - Raster row index of pour point location
    * - cell_col
      - Raster column index of pour point location
-
-.. list-table:: **Events attributes repeated for each rain event of xx mm**
-   :header-rows: 1
-
-   * - Attribute Name
-     - Description
-   * - rainv_xx
-     - Volume of rain falling on the local watershed. In m3.
-   * - v_xx
-     - Volume of water in the bluespot. (Sum of water falling on local watershed and water flowing in from upstream).
-       In m3.
-   * - pctv_xx
-     - Percentage of bluespot volume (capacity) filled.
-   * - spillv_xx
-     - Volume of water spilled downstream from the bluespot. In m3.
-
+   * - inputv
+     - Calculated model input water volume of local watershed. 0 (zero) for nodes of type ``junction``. In m3.
 
 Example:
 
 .. code-block:: console
 
-    $ malstroem rain -nodes shpdir/ -nodes_layer nodes -r 10 -r 20 -out shpdir/ -out_layer nodes
+    $ malstroem initvolumes -mm 20 -nodes results.gpkg -nodes_layer nodes -out results.gpkg -out_layer initvolumes -format gpkg
 
+malstroem finalvolumes
+----------------------
+Calculate final bluespot fill volumes and spill volumes after infinite time.
+
+The initial volumes of water released in the model are defined per ``node``. Initial volumes may be calculated using `malstroem initvolumes`_.
+Output from `malstroem initvolumes`_ may be edited (water may be added or subtracted) before being input to this process.
+
+Arguments:
+ * ``inputvolumes`` OGR datasource containing with model input water volume per node in m3
+ * ``inputvolumes_layer`` Layer name of inputvolumes layer
+ * ``out`` output OGR datasource.
+ * ``out_layer`` layer name for output layer within the output datasource.
+
+Outputs:
+ * Finalvolumes Point layer which is a copy of the input ``inputvolumes`` layer supplied with the calculated final state volumes.  
+
+.. list-table:: **Finalvolumes attributes**
+   :header-rows: 1
+
+   * - Attribute Name
+     - Description
+   * - nodeid
+     - Integer ID for each node.
+   * - nodetype
+     - ``pourpoint`` or ``junction``.
+   * - dstrnodeid
+     - ``nodeid`` of the next downstream node.
+   * - bspot_id
+     - Bluespot ID. NULL for nodes of type ``junction``.
+   * - bspot_area
+     - Bluespot area in m2. 0 (zero) for nodes of type ``junction``.
+   * - bspot_vol
+     - Bluespot volume (or capacity) in m3. 0 (zero) for nodes of type ``junction``.
+   * - wshed_area
+     - Area of local bluespot watershed. In m2. 0 (zero) for nodes of type ``junction``.
+   * - cell_row
+     - Raster row index of pour point location
+   * - cell_col
+     - Raster column index of pour point location
+   * - inputv
+     - Used model input water volume in m3
+   * - v
+     - Volume of water in the bluespot. (Sum of water input from local watershed and water flowing in from upstream).
+       In m3.
+   * - pctv
+     - Percentage of bluespot volume (capacity) filled.
+   * - spillv
+     - Volume of water spilled downstream from the bluespot. In m3.
+
+Example:
+
+.. code-block:: console
+
+    $ malstroem finalvolumes -inputvolumes results.gpkg -inputvolumes_layer my_scenario_input -out results.gpkg -out_layer my_scenario_final -format gpkg
+
+malstroem hyps
+--------------
+Collect hypsometric (terrain elevation) statistics for each bluespot.
+
+The output from this process is used for approximating water level and extents of partially filled bluespots.
+
+For each bluespot these values describing the terrain within the bluespot are returned:      
+ - A DEM Z value histogram with user definable bin width (resolution)     
+ - Number of bins, effective upper and lower bounds of the histogram     
+ - Actual minimum and maximum Z values
+
+The ID 0 (zero) must be used for cells which do not belong to a bluespot. Statistics are not collected for this ID.
+
+The values of the histogram are formatted as a single string using pipe ``|`` as seperator. Like: ``2|1|0|3``.
+
+Arguments:
+ * ``bluespots`` Bluespots ID raster.
+ * ``dem`` The raster digital elevation model.
+ * ``pourpoints`` OGR vector datasource with pour points.
+ * ``pourpoints_layer`` layer name within `pourpoints` datasource. Needed when datasource can have multiple layers (eg.
+   a database).
+ * ``zresolution`` Resolution (or bin width) in [m] of output Z histogram. This affects the precision of the approximated values.
+ * ``out`` output OGR datasource. Output is non-geometric.
+ * ``out_hyps_layer`` layer name for output layer within the output datasource.
+
+Outputs:
+ * Non-geometric, tabular hypsometry layer which is a copy of the input ``pourpoints`` layer supplied with the calculated stats.
+
+.. list-table:: **Hyps attributes**
+   :header-rows: 1
+
+   * - Attribute Name
+     - Description
+   * - nodeid
+     - Integer ID for each node.
+   * - nodetype
+     - ``pourpoint`` or ``junction``.
+   * - dstrnodeid
+     - ``nodeid`` of the next downstream node.
+   * - bspot_id
+     - Bluespot ID. NULL for nodes of type ``junction``.
+   * - bspot_area
+     - Bluespot area in m2. 0 (zero) for nodes of type ``junction``.
+   * - bspot_vol
+     - Bluespot volume (or capacity) in m3. 0 (zero) for nodes of type ``junction``.
+   * - wshed_area
+     - Area of local bluespot watershed. In m2. 0 (zero) for nodes of type ``junction``.
+   * - cell_row
+     - Raster row index of pour point location
+   * - cell_col
+     - Raster column index of pour point location
+   * - hist_counts
+     - Histogram counts formatted as a single string using pipe ``|`` as seperator. Like: ``2|1|0|3``.
+   * - hist_num_bins
+     - Number of bins in the histogram.
+   * - hist_lower_bound
+     - Lower bound of the histogram in m.
+   * - hist_upper_bound
+     - Upper bound of the histogram in m.
+   * - hist_resolution
+     - Bin width in m.
+   * - z_min
+     - Actual minimum Z value in m.
+   * - z_max
+     - Actual maximum Z value in m.
+   * - cell_area
+     - DEM cell area in m2.
+
+Example:
+
+.. code-block:: console
+
+    $ malstroem hyps -bluespots bluespots.tif -dem dem.tif -pourpoints results.gpkg -pourpoints_layer pourpoints -zresolution 0.03 -out results.gpkg -out_layer hyps
+
+malstroem finallevels
+---------------------
+Approximate water levels of partially filled bluespots in the final state.
+
+Uses statistics collected with `malstroem hyps`_ to approximate the water levels.
+
+Note: This proces assumes that a given bluespot is filled in cell Z order (from
+lowest to highest cells). No attempt is made to model how water actually
+flows within the bluespot.
+
+Arguments:
+ * ``finalvols`` OGR datasource containing final state water volumes
+ * ``finalvols_layer`` Layer name within `finalvols` datasource. Needed when datasource can have multiple layers.
+ * ``hyps`` OGR datasource containing hypsometric stats for each bluespot as output by `malstroem hyps`_.
+ * ``hyps_layer`` Layer name within `hyps` datasource.
+ * ``out`` Output OGR datasource. Output is non-geometric.
+ * ``out_layer`` Layer name of output.
+
+Outputs:
+ * Non-geometric, tabular layer which is a copy of the input ``finalvols`` layer supplied with the approximated water level.
+
+.. list-table:: **Finalvolumes attributes**
+   :header-rows: 1
+
+   * - Attribute Name
+     - Description
+   * - nodeid
+     - Integer ID for each node.
+   * - nodetype
+     - ``pourpoint`` or ``junction``.
+   * - dstrnodeid
+     - ``nodeid`` of the next downstream node.
+   * - bspot_id
+     - Bluespot ID. NULL for nodes of type ``junction``.
+   * - bspot_area
+     - Bluespot area in m2. 0 (zero) for nodes of type ``junction``.
+   * - bspot_vol
+     - Bluespot volume (or capacity) in m3. 0 (zero) for nodes of type ``junction``.
+   * - wshed_area
+     - Area of local bluespot watershed. In m2. 0 (zero) for nodes of type ``junction``.
+   * - cell_row
+     - Raster row index of pour point location
+   * - cell_col
+     - Raster column index of pour point location
+   * - inputv
+     - Used model input water volume in m3
+   * - v
+     - Volume of water in the bluespot. (Sum of water input from local watershed and water flowing in from upstream).
+       In m3.
+   * - pctv
+     - Percentage of bluespot volume (capacity) filled.
+   * - spillv
+     - Volume of water spilled downstream from the bluespot. In m3.
+   * - approx_z
+     - Approximated water level Z in m.
+   * - approx_dmax
+     - Approximated maximum water depth in m.
+
+Example:
+
+.. code-block:: console
+
+    $ malstroem finallevels -finalvols results.gpkg -finalvols_layer my_scenario_final -hyps results.gpkg -out results.gpkg -out_layer my_scenario_final_levels
+
+malstroem finalbluespots
+------------------------
+Create rasters showing approximated bluespot extent and approximated bluespot depths in the final state.
+
+Arguments:
+ * ``bluespots`` Bluespots ID raster (Must be bluespots in the maximum extent)
+ * ``dem`` The raster digital elevation model.
+ * ``finallevels`` OGR datasource containing final state water Z levels as output from `malstroem finallevels`_.
+ * ``finallevels_layer`` Layer name within `finallevels` datasource.
+ * ``out_depths`` Output file for approximate depths raster. Optional.
+ * ``out_bluespots`` Output file for approximated bluespots id raster. Optional.
+
+Output:
+ * Optionally a raster with bluespot IDs of approximated extents. The ID 0 (zero) is used for cells which do not belong to a bluespot.
+ * Optionally a raster with approximated bluespot depths in m.
+
+Example:
+
+.. code-block:: console
+
+  $ malstroem finalbluespots -bluespots bluespots.tif -dem dem.tif -finallevels results.gpkg -finallevels_layer my_scenario_final_levels -out_depths my_scenario_depths.tif -out_bluespots my_scenario_bspot_ids.tif
+
+malstroem polys
+---------------
+Polygonize ID raster.
+
+Create vector polygons for all connected regions of cells in the raster sharing a common ID.
+    
+Note that partially filled bluespots may have disconnected regions and hence there may be more than one polygon
+with the same bluespot ID.
+
+Arguments:
+ * ``raster`` Raster file with IDs (bluespots or watersheds).
+ * ``out`` Output OGR datasource.
+ * ``layername`` Layer name within the `out` datasource.
+
+ Outputs:
+  * Polygon vector layer with one polygon for each connected region of cells in the raster sharing a common ID.
 
 Complete chain of processes
 ---------------------------
@@ -480,3 +712,9 @@ The below series of process calls will produce the same results as ``malstroem c
 
 This workflow utilizes default OGR output format and layer names. Both formats and layer names can be controlled by
 parameters.
+
+Example:
+
+.. code-block:: console
+
+    $ malstroem initvolumes -nodes shpdir/ -nodes_layer nodes -r 10 -r 20 -out shpdir/ -out_layer nodes

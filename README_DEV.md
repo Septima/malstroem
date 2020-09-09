@@ -29,13 +29,6 @@ If you want to run the speedups they need to be compiled at installation time.
     py.test
 ```
 
-Development
------------
-sphinx-apidoc --full -a -H malstroem -A "Asger Skovbo Petersen, Septima" -V 0.0.1 -o docs malstroem
-cd docs
-make html
-open _build/html/index.html
-
 Documentation
 -------------
 
@@ -44,7 +37,7 @@ Written in restructuredText and compiled using sphinx.
 After changes to `malstroem` code recreate apidoc
 
 ```bash
-sphinx-apidoc --full -a -H malstroem -A "Asger Skovbo Petersen, Septima" -V 0.0.1 -o docs malstroem
+sphinx-apidoc -f -a -H malstroem -A "Asger Skovbo Petersen, Septima" -V 0.0.1 -o docs/api malstroem
 ```
 
 
