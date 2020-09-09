@@ -700,21 +700,45 @@ The below series of process calls will produce the same results as ``malstroem c
 
 .. code-block:: console
 
-    $ malstroem filled -dem dem.tif -out filled.tif
-    $ malstroem depths -dem dem.tif -filled filled.tif -out depths.tif
-    $ malstroem flowdir -dem dem.tif -out flowdir.tif
-    $ malstroem accum -flowdir flowdir.tif -out accum.tif
-    $ malstroem bspots -filter "maxdepth > 0.05 and (area > 20 or volume > 0.5)" -depths depths.tif -out bspots.tif
-    $ malstroem wsheds -bluespots bspots.tif -flowdir flowdir.tif -out wsheds.tif
-    $ malstroem pourpts -bluespots bspots.tif -depths depths.tif -watersheds wsheds.tif -dem dem.tif -out shpdir/
-    $ malstroem network -bluespots bspots.tif -flowdir flowdir.tif -pourpoints shpdir/ -out shpdir
-    $ malstroem rain -nodes shpdir/ -r 10 -r 20 -out shpdir/
+    # Input
+    DEMFILE=dem.tif
 
-This workflow utilizes default OGR output format and layer names. Both formats and layer names can be controlled by
-parameters.
+    # Raster outputs
+    LABELSFILE=bluespots.tif
+    FILLEDFILE=filled.tif
+    DEPTHSFILE=depths.tif
+    FLOWDIRFILE=flowdir.tif
+    ACCUMFILE=accum.tif
+    WSHEDSFILE=wsheds.tif
+    FINALBLUESPOTSFILE=final_bluespots.tif
+    FINALDEPTHSFILE=final_depths.tif
 
-Example:
+    # Vector outputs
+    OUTVECTOR=results.gpkg
+    PPTS=pourpoints
+    NODES=nodes
+    INITVOL=initvolumes
+    FINALVOLS=finalvolumes
+    HYPS=hyps
+    FINALLEVELS=finallevels
+    FINALPOLYGONS=finalpolygons
 
-.. code-block:: console
+    # Process
+    malstroem filled -dem $DEMFILE -out $FILLEDFILE
+    malstroem depths -dem $DEMFILE -filled $FILLEDFILE -out $DEPTHSFILE
+    malstroem flowdir -dem $DEMFILE -out $FLOWDIRFILE
+    malstroem accum -flowdir $FLOWDIRFILE -out $ACCUMFILE
+    malstroem bspots -filter "maxdepth > 0.05 and (area > 20 or volume > 0.5)" -depths $DEPTHSFILE -out $LABELSFILE
+    malstroem wsheds -bluespots $LABELSFILE -flowdir $FLOWDIRFILE -out $WSHEDSFILE
+    malstroem pourpts -bluespots $LABELSFILE -depths $DEPTHSFILE -watersheds $WSHEDSFILE -dem $DEMFILE -out $OUTVECTOR -layername $PPTS -format gpkg
+    malstroem hyps -bluespots $LABELSFILE -dem $DEMFILE -pourpoints $OUTVECTOR -pourpoints_layer $PPTS -zresolution 0.1 -out $OUTVECTOR -out_hyps_layer $HYPS
+    malstroem network -bluespots $LABELSFILE -flowdir $FLOWDIRFILE -pourpoints $OUTVECTOR -pourpoints_layer $PPTS -out $OUTVECTOR -out_nodes_layer $NODES
+    malstroem initvolumes -nodes $OUTVECTOR -nodes_layer $NODES -mm 20 -out $OUTVECTOR -out_layer $INITVOL
+    malstroem finalvolumes -inputvolumes $OUTVECTOR -inputvolumes_layer $INITVOL -out $OUTVECTOR -out_layer $FINALVOLS
+    malstroem finallevels -finalvols $OUTVECTOR -finalvols_layer $FINALVOLS -hyps $OUTVECTOR -hyps_layer $HYPS -out $OUTVECTOR -out_layer $FINALLEVELS
+    malstroem finalbluespots -bluespots $LABELSFILE -dem $DEMFILE -finallevels $OUTVECTOR -finallevels_layer $FINALLEVELS -out_depths $FINALDEPTHSFILE -out_bluespots $FINALBLUESPOTSFILE
+    malstroem polys -raster $FINALBLUESPOTSFILE -out $OUTVECTOR -layername $FINALPOLYGONS
 
-    $ malstroem initvolumes -nodes shpdir/ -nodes_layer nodes -r 10 -r 20 -out shpdir/ -out_layer nodes
+Accumulated flow takes time to calculate and is not always needed.
+
+Multiple scenarios can be quickly calculated by repeating the steps ``initvolumes``, ``finalvolumes``, ``finallevels``, ``finalbluespots`` and ``polys`` for each scenario. Layer names need to be unique for each run.
