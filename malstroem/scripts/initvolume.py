@@ -19,16 +19,25 @@ from builtins import (ascii, bytes, chr, dict, filter, hex, input,
 
 import click
 import click_log
-
+import logging
 from osgeo import ogr
 from malstroem import io, rain as raintool
 
+logger = logging.getLogger(__name__)
 
 @click.command('initvolumes')
 @click.option('-nodes', required=True, help='OGR datasource containing nodes layer')
 @click.option('-nodes_layer', default='nodes', show_default=True, help='Nodes layer name ')
-@click.option('-mm', required=False, type=float, help='Evenly distributed rain event [mm]')
-@click.option('-pr', required=False, type=click.Path(exists=True), help='Raster [mm]')
+@click.option('-mm', required=False, type=float, help='Evenly distributed rain event [mm]. Mutually exlcusive with -pr')
+@click.option('-pr', required=False, type=click.Path(exists=True), help='Raster specifying input water. Mutually exlcusive with -mm')
+@click.option('-pr_unit', 
+    default="mm", 
+    show_default=True, 
+    required=False, 
+    type=click.Choice(raintool.Unit.__members__), 
+    callback=lambda c, p, v: getattr(raintool.Unit, v) if v else None, 
+    help="Unit of cell values in '-pr' raster")
+@click.option('-bluespots', required=False, type=click.Path(exists=True), help='Bluespots ID file. Required with -pr')    
 @click.option('-out', required=True, help='Output OGR datasource')
 @click.option('-out_layer', default='initvolumes', show_default=True, help='Calculated model input volumes in  [m3]')
 @click.option('-out_attribute', default='inputv', show_default=True, help='Name of output attribute')
@@ -36,7 +45,7 @@ from malstroem import io, rain as raintool
 @click.option('-dsco', multiple=True, type=str, nargs=0, help='OGR datasource creation options. See OGR documentation')
 @click.option('-lco', multiple=True, type=str, nargs=0, help='OGR layer creation options. See OGR documentation')
 @click_log.simple_verbosity_option()
-def process_volumes(nodes, nodes_layer, mm, pr, out, out_layer, out_attribute, format, dsco, lco):
+def process_volumes(nodes, nodes_layer, mm, pr, pr_unit, bluespots, out, out_layer, out_attribute, format, dsco, lco):
     """Calculate initial water volumes for each watershed.
 
     The output from this process can be used as input for the network calculation.
@@ -48,9 +57,11 @@ def process_volumes(nodes, nodes_layer, mm, pr, out, out_layer, out_attribute, f
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """
-    # Validate mutually exclusive
+    # Validate one and only one
     if mm and pr:
-        raise Exception("-mm and -r are mutually exclusive")
+        raise click.UsageError("-mm and -pr are mutually exclusive")
+    if not mm and not pr:
+        raise click.UsageError("One of -mm and -pr must be specified")
 
     nodes_layer = nodes_layer
     format = str(format)
@@ -59,5 +70,16 @@ def process_volumes(nodes, nodes_layer, mm, pr, out, out_layer, out_attribute, f
     # Calculate volumes
     nodes_reader = io.VectorReader(nodes, nodes_layer)
     volumes_writer = io.VectorWriter(format, out, out_layer, None, ogr.wkbPoint, nodes_reader.crs, dsco, lco) 
-    rain_tool = raintool.SimpleVolumeTool(nodes_reader, volumes_writer, out_attribute, mm)
-    rain_tool.process()
+
+    if mm:
+        logger.info(f"Processing initial volumes using evenly distributed rain event of {mm}mm")
+        rain_tool = raintool.SimpleVolumeTool(nodes_reader, volumes_writer, out_attribute, mm)
+        rain_tool.process()
+    else:
+        if not bluespots:
+            raise click.UsageError("Mising -bluespots")
+        logger.info(f"Processing initial volumes using [{pr_unit}] raster input from {pr}")
+        precip_reader = io.RasterReader(pr)
+        bspotlabels_reader = io.RasterReader(bluespots)
+        tool = raintool.RasterVolumeTool(nodes_reader, bspotlabels_reader, precip_reader, pr_unit, volumes_writer, out_attribute)
+        tool.process()
