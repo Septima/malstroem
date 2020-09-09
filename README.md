@@ -22,8 +22,10 @@ malstroem provides command line tools and a python api to calculate:
 * Local watershed for each bluespot
 * Pour points (point where water leaves blue spot when it is filled to its maximum capacity)
 * Flow paths between blue spots
-* Fill volume at specified rain incidents
-* Spill over between blue spots at specified rain incidents
+* Rain incident can be specified either as a single scalar value (x mm) or as a raster
+* Fill volume at specified rain incident
+* Spill over between blue spots at specified rain incident
+* Approximate water level and extent of partially filled bluespots
 
 Assumptions
 -----------
@@ -34,27 +36,21 @@ malstroem makes some assumptions to simplify calculations. The most important on
 width or depth. Streams wont flow over. The end result is the situation after infinite time, when all water has reached
 its final destination.
 * Water flows from one cell to one other cell (the D8 method).
+* Partially filled bluespots are assumed to be filled in cell Z order (from lowest to highest cells). No attempt is made 
+to model how water actually flows within the bluespots.
 
 Example usage
 -------------
-Calculate all derived data for 10mm and 30mm rain incidents ignoring bluespots where the maximum water depth is less than 5cm:
+Calculate all derived data for 20mm rain incident ignoring bluespots where the maximum water depth is less than 5cm and using 20cm statistics resolution when approximating water level of partially filled bluespots:
 
 ```bash
-malstroem complete -mm 20 -filter 'maxdepth > 0.05' -dem dem.tif -outdir c:\outputdirectory
+malstroem complete -mm 20 -filter 'maxdepth > 0.05' -dem dem.tif -outdir c:\outputdirectory -zresolution 0.2
 ```
 
 
 Installation
 ------------
-
-Theoretically:
-
-```bash
-pip install cython numpy scipy gdal
-pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
-```
-
-Unfortunately the above doesn't work on all platforms as malstroem uses som third party libraries and has some optimized code which needs to be compiled for each platform. This method should work on most linux distributions.
+It is a bit tricky to get malstroem correctly installed. Use the precompiled Windows binary if you are on Windows, otherwise install using Anaconda.
 
 ### Windows
 If you are not going to write your own python program using malstroem you can just download the precompiled standalone executable.
@@ -128,19 +124,28 @@ pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
  malstroem --help
  ```
 
+### Install using pip
+Theoretically it should be possible to install malstroem using pip:
+
+```bash
+pip install cython numpy scipy gdal
+pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
+```
+
+Unfortunately the above doesn't work on all platforms as malstroem uses som third party libraries and has some optimized code which needs to be compiled for each platform.
 
 
 Bugs and contributions
 ----------------------
-- Please report issues using the issue tracker: github.com/Kortforsyningen/malstroem/issues
-- Contributions are welcome at github.com/Kortforsyningen/malstroem/
+- Please report issues using the issue tracker: https://github.com/Septima/malstroem/issues
+- Contributions are welcome at https://github.com/Septima/malstroem
 
 If you are not familiar with GitHub please read this short [guide](https://guides.github.com/activities/contributing-to-open-source/).
 
 License
 -------
 ```
-Copyright (c) 2019
+Copyright (c) 2020
 Developed by Septima.dk and Thomas Balstrøm (University of Copenhagen) for the Danish Agency for
 Data Supply and Efficiency. This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by the Free Software Foundation,
