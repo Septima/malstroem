@@ -2,9 +2,10 @@ from click.testing import CliRunner
 
 from malstroem.scripts.cli import cli
 from malstroem import io
-from data.fixtures import dtmfile, filledfile, flowdirnoflatsfile, depthsfile, labeledfile, wshedsfile, pourpointsfile, nodesfile, initvolsfile, finalvolsfile, hypsfile
+from data.fixtures import dtmfile, filledfile, flowdirnoflatsfile, depthsfile, labeledfile, wshedsfile, pourpointsfile, nodesfile, initvolsfile, finalvolsfile, hypsfile, precipraster_byte_file, precipraster_float_file
 import numpy as np
 import os
+import pytest
 
 
 def test_complete(tmpdir):
@@ -165,7 +166,7 @@ def test_network(tmpdir):
     assert os.path.isfile(str(tmpdir.join('streams.shp')))
 
 
-def test_initvolumes(tmpdir):
+def test_initvolumes_mm(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['initvolumes',
                                  '-nodes', nodesfile,
@@ -174,6 +175,33 @@ def test_initvolumes(tmpdir):
                                  '-out', str(tmpdir)],)
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
     assert os.path.isfile(str(tmpdir.join('initvolumes.shp')))
+
+@pytest.mark.parametrize("precipfile", [precipraster_byte_file, precipraster_float_file])
+def test_initvolumes_pr_filetype(tmpdir, precipfile):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['initvolumes',
+                                 '-nodes', nodesfile,
+                                 '-nodes_layer', 0,
+                                 '-pr', precipfile,
+                                 '-pr_unit', "mm",
+                                 '-bluespots', labeledfile,
+                                 '-out', str(tmpdir)],)
+    assert result.exit_code == 0, 'Output: {}'.format(result.output)
+    assert os.path.isfile(str(tmpdir.join('initvolumes.shp')))    
+
+@pytest.mark.parametrize("pr_unit", ["mm", "l", "m3"])
+def test_initvolumes_pr_unit(tmpdir, pr_unit):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['initvolumes',
+                                 '-nodes', nodesfile,
+                                 '-nodes_layer', 0,
+                                 '-pr', precipraster_float_file,
+                                 '-pr_unit', pr_unit,
+                                 '-bluespots', labeledfile,
+                                 '-out', str(tmpdir)],)
+    assert result.exit_code == 0, 'Output: {}'.format(result.output)
+    assert os.path.isfile(str(tmpdir.join('initvolumes.shp')))    
+
 
 def test_finalvols(tmpdir):
     runner = CliRunner()
