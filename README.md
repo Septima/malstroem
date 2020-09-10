@@ -94,8 +94,8 @@ pip install https://github.com/Septima/malstroem/archive/master.zip#[speedups]
  malstroem --help
  ```
  
-### Installing on Mac OSX
-1. Download and install [miniconda3 64bit](https://docs.conda.io/en/latest/miniconda.html) for MacOSX.
+### Installing on Linux or Mac OSX
+1. Download and install [miniconda3 64bit](https://docs.conda.io/en/latest/miniconda.html).
 
 2. Download the malstroem dependencies file [environment.yml](https://github.com/Septima/malstroem/raw/master/environment.yml).
 
