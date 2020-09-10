@@ -725,18 +725,31 @@ The below series of process calls will produce the same results as ``malstroem c
 
     # Process
     malstroem filled -dem $DEMFILE -out $FILLEDFILE
+
     malstroem depths -dem $DEMFILE -filled $FILLEDFILE -out $DEPTHSFILE
+    
     malstroem flowdir -dem $DEMFILE -out $FLOWDIRFILE
+    
     malstroem accum -flowdir $FLOWDIRFILE -out $ACCUMFILE
+    
     malstroem bspots -filter "maxdepth > 0.05 and (area > 20 or volume > 0.5)" -depths $DEPTHSFILE -out $LABELSFILE
+    
     malstroem wsheds -bluespots $LABELSFILE -flowdir $FLOWDIRFILE -out $WSHEDSFILE
+    
     malstroem pourpts -bluespots $LABELSFILE -depths $DEPTHSFILE -watersheds $WSHEDSFILE -dem $DEMFILE -out $OUTVECTOR -layername $PPTS -format gpkg
+    
     malstroem hyps -bluespots $LABELSFILE -dem $DEMFILE -pourpoints $OUTVECTOR -pourpoints_layer $PPTS -zresolution 0.1 -out $OUTVECTOR -out_hyps_layer $HYPS
+    
     malstroem network -bluespots $LABELSFILE -flowdir $FLOWDIRFILE -pourpoints $OUTVECTOR -pourpoints_layer $PPTS -out $OUTVECTOR -out_nodes_layer $NODES
+    
     malstroem initvolumes -nodes $OUTVECTOR -nodes_layer $NODES -mm 20 -out $OUTVECTOR -out_layer $INITVOL
+    
     malstroem finalvolumes -inputvolumes $OUTVECTOR -inputvolumes_layer $INITVOL -out $OUTVECTOR -out_layer $FINALVOLS
+    
     malstroem finallevels -finalvols $OUTVECTOR -finalvols_layer $FINALVOLS -hyps $OUTVECTOR -hyps_layer $HYPS -out $OUTVECTOR -out_layer $FINALLEVELS
+    
     malstroem finalbluespots -bluespots $LABELSFILE -dem $DEMFILE -finallevels $OUTVECTOR -finallevels_layer $FINALLEVELS -out_depths $FINALDEPTHSFILE -out_bluespots $FINALBLUESPOTSFILE
+    
     malstroem polys -raster $FINALBLUESPOTSFILE -out $OUTVECTOR -layername $FINALPOLYGONS
 
 Accumulated flow takes time to calculate and is not always needed.

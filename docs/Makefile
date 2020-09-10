@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-PAPER         =
+PAPER         = a4
 BUILDDIR      = _build
 
 # Internal variables.
@@ -33,6 +33,7 @@ help:
 	@echo "  latexpdfja  to make LaTeX files and run them through platex/dvipdfmx"
 	@echo "  lualatexpdf to make LaTeX files and run them through lualatex"
 	@echo "  xelatexpdf  to make LaTeX files and run them through xelatex"
+	@echo "  tectonicpdf to make LaTeX files and run them through tectonic"
 	@echo "  text        to make text files"
 	@echo "  man         to make manual pages"
 	@echo "  texinfo     to make Texinfo files"
@@ -163,6 +164,13 @@ xelatexpdf:
 	@echo "Running LaTeX files through xelatex..."
 	$(MAKE) PDFLATEX=xelatex -C $(BUILDDIR)/latex all-pdf
 	@echo "xelatex finished; the PDF files are in $(BUILDDIR)/latex."
+
+.PHONY: tectonicpdf
+tectonicpdf:
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
+	@echo "Running LaTeX files through tectonic..."
+	$(MAKE) PDFLATEX=tectonic -C $(BUILDDIR)/latex all-pdf
+	@echo "tectonic finished; the PDF files are in $(BUILDDIR)/latex."
 
 .PHONY: text
 text:
