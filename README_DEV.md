@@ -53,6 +53,12 @@ Make pdf documentation
 
 ```bash
 cd docs
+make tectonicpdf
+open _build/latex/malstroem.pdf
+```
+or
+```bash
+cd docs
 make latex
 cd _build/latex/
 tectonic *.tex
