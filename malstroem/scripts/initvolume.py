@@ -52,8 +52,8 @@ def process_volumes(nodes, nodes_layer, mm, pr, pr_unit, bluespots, out, out_lay
 
     \b
     Examples:
-    malstroem rain -mm 10 -nodes results.gpkg -out results.gpkg -format gpkg
-    malstroem rain -pr precip_raster.tif -bluespots bluespots.tif -nodes results.gpkg -out results.gpkg -format gpkg
+    malstroem initvolumes -mm 10 -nodes results.gpkg -out results.gpkg -format gpkg
+    malstroem initvolumes -pr precip_raster.tif -bluespots bluespots.tif -nodes results.gpkg -out results.gpkg -format gpkg
 
     For documentation of OGR features (format, dsco and lco) see http://www.gdal.org/ogr_formats.html
     """

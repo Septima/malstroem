@@ -452,11 +452,12 @@ Outputs:
    * - inputv
      - Calculated model input water volume of local watershed. 0 (zero) for nodes of type ``junction``. In m3.
 
-Example:
+Examples:
 
 .. code-block:: console
 
     $ malstroem initvolumes -mm 20 -nodes results.gpkg -nodes_layer nodes -out results.gpkg -out_layer initvolumes -format gpkg
+    $ malstroem initvolumes -pr precip_raster.tif -bluespots bluespots.tif -nodes results.gpkg -out results.gpkg -format gpkg
 
 malstroem finalvolumes
 ----------------------
