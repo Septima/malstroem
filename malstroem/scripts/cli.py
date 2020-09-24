@@ -26,10 +26,12 @@ from malstroem.scripts import finalstate
 from malstroem.scripts import hyps
 
 
-@click.group('malstroem')
+@click.group("malstroem")
 @click.version_option()
 @click_log.simple_verbosity_option()
-@click.version_option(version=malstroem.__version__) #, prog_name="fire", help="Vis versionsnummer")
+@click.version_option(
+    version=malstroem.__version__
+)  # , prog_name="fire", help="Vis versionsnummer")
 @click_log.init()
 def cli():
     """Calculate simple hydrologic models.
@@ -42,11 +44,12 @@ def cli():
 
     \b
     Examples:
-    malstroem complete -mm 20 -filter 'volume > 2.5' -dem dem.tif -outdir ./outdir/ -zresolution 0.1
+    malstroem complete -mm 20 -filter "volume > 2.5" -dem dem.tif -outdir ./outdir/ -zresolution 0.1
     malstroem filled -dem dem.tif -out filled.tif
 
     """
     pass
+
 
 # complete
 cli.add_command(complete.process_all)
@@ -82,5 +85,5 @@ cli.add_command(finalstate.process_finallevels)
 cli.add_command(finalstate.process_bluespots)
 
 # If run in pyinstaller
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     cli(sys.argv[1:])
