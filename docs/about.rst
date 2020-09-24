@@ -19,8 +19,7 @@ In Asger’s implementation the geometric network component was omitted.
 
 References
 ----------
-Balstrøm, T. (2016, submitted): A hydrologic screening method for storm water assessments based on
-raster processing and geometric networks. Submitted to Computers & Geosciences, Oct. 2016.
+Balstrøm, T. & Crawford, D. (2018): Arc-Malstrøm: A 1D hydrologic screening method for stormwater assessments based on geometric networks-. Computers & Geosciences vol. 116, July 2018, pp. 64-73 (`https://doi.org/10.1016/j.cageo.2018.04.010 <https://doi.org/10.1016/j.cageo.2018.04.010>`_).
 
 Bugs and contributions
 ----------------------
