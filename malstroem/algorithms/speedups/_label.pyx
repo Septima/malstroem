@@ -26,7 +26,7 @@ cdef packed struct stat_record:
 
 cdef packed struct index_record:
     np.float64_t value
-    np.int_t row, col
+    np.int32_t row, col
 
 
 def label_stats(data, labelled, nlabels=None):
@@ -102,7 +102,7 @@ cdef label_min_index_float64_int32_cython(np.float64_t[:,:] data, np.int32_t [:,
     if not nlabels:
         nlabels = np.max(labelled)
 
-    dtype = [('value', np.float64), ('row', np.int), ('col', np.int)]
+    dtype = [('value', np.float64), ('row', np.int32), ('col', np.int32)]
     lmin = np.zeros((nlabels + 1,), dtype=dtype)
     lmin[:]['value'] = float('inf')
     lmin[:]['row'] = -1
@@ -133,7 +133,7 @@ cdef label_min_index_fallback_cython(data, labelled, nlabels=None):
     if not nlabels:
         nlabels = np.max(labelled)
 
-    dtype = [('value', np.float64), ('row', np.int), ('col', np.int)]
+    dtype = [('value', np.float64), ('row', np.int32), ('col', np.int32)]
     lmin = np.zeros((nlabels + 1,), dtype=dtype)
     lmin[:]['value'] = float('inf')
     lmin[:]['row'] = -1

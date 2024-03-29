@@ -23,14 +23,14 @@ from ._definitions cimport DTYPE_t_FLOWDIR, DTYPE_t_ACCUM, DTYPE_t_FILL, DTYPE_t
 
 
 cdef packed struct cell_struct:
-    np.int_t r, c
+    np.int32_t r, c
 
 cdef packed struct cell_label32_struct:
-    np.int_t r, c
+    np.int32_t r, c
     np.int32_t label
 
 cdef packed struct cell_label64_struct:
-    np.int_t r, c
+    np.int32_t r, c
     np.int64_t label
 
 AGNPS_DELTA_NP = np.array(
@@ -43,7 +43,7 @@ AGNPS_DELTA_NP = np.array(
          [ 1,-1], # DownLeft
          [ 0,-1], # Left
          [-1,-1]  # UpLeft
-        ], dtype=np.int )
+        ], dtype=np.int64 )
 cdef long[:,:] AGNPS_DELTA_MV = AGNPS_DELTA_NP
 
 
