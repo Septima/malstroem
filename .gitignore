@@ -109,3 +109,4 @@ ENV/
 data/
 outdir/
 .DS_Store
+*.gpkg
