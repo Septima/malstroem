@@ -27,26 +27,29 @@ def extract_bluespots(base_dir):
                 gdf = gpd.read_file(input_file, layer='finalbluespots')
                 gdf.to_file(bluespots_output_file, driver='GPKG')
 
-def combine_results(gdf, base_dir):
+def combine_results(gdf, results_dir):
     """
     Combine the results of the model runs in the directories specified in the list dirs.
     """
 
+    if not os.path.exists(results_dir):
+        print(f"Directory {results_dir} does not exist.")
+        return None
+    
     gdf_streams = gpd.GeoDataFrame()
     gdf_bluespots = gpd.GeoDataFrame()
 
     crs = gdf.crs
 
     for index, row in gdf.iterrows():
-        results_dir = f"{base_dir}/merged_{row['vassdragsnummer']}"
+        streams_file = f"{results_dir}/streams_{row['vassdragsnummer']}.gpkg"
+        bluespots_file = f"{results_dir}/bluespots_{row['vassdragsnummer']}.gpkg"  
+
         polygon = row['geometry']
-        if not os.path.exists(results_dir):
-            print(f"Directory {results_dir} does not exist.")
-            continue
         print("Processing: ", row["vassdragsnummer"])
 
-        gdf_streams_dir = gpd.read_file(f"{results_dir}/malstroem.gpkg", layer='streams').to_crs(crs)
-        gdf_bluespots_dir = gpd.read_file(f"{results_dir}/malstroem.gpkg", layer='finalbluespots').to_crs(crs)
+        gdf_streams_dir = gpd.read_file(streams_file).to_crs(crs)
+        gdf_bluespots_dir = gpd.read_file(bluespots_file).to_crs(crs)
 
         gdf_streams_dir = gdf_streams_dir.clip(polygon)
         gdf_bluespots_dir = gdf_bluespots_dir.clip(polygon)
