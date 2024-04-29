@@ -106,3 +106,9 @@ ENV/
 
 # vscode
 .vscode
+data/
+outdir/
+.DS_Store
+*.gpkg
+dtm/
+output/

@@ -45,6 +45,7 @@ Calculate all derived data for 20mm rain incident ignoring bluespots where the m
 
 ```bash
 malstroem complete -mm 20 -filter 'maxdepth > 0.05' -dem dem.tif -outdir c:\outputdirectory -zresolution 0.2
+malstroem complete -mm 20 -filter 'volume > 2.5' -dem data/merged_008.22.tif -outdir ./outdir/ -zresolution 0.1
 ```
 
 
