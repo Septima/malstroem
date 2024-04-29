@@ -110,3 +110,5 @@ data/
 outdir/
 .DS_Store
 *.gpkg
+dtm/
+output/

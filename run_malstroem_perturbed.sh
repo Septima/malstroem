@@ -1,15 +1,10 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 input_dir base_out_dir"
-    exit 1
-fi
-
 objectid="009.11"
 # Directory containing the .tif files
-input_dir=$1
+input_dir="data/malstroem-50/merged_${objectid}/perturbed"
 # Base directory for output
-base_out_dir=$2
+base_out_dir="data/malstroem-50/merged_${objectid}/perturbed_out"
 
 # Loop over each .tif file in the input directory
 for file in "$input_dir"/*.tif; do

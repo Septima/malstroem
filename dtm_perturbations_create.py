@@ -4,6 +4,8 @@ import numpy as np
 from tqdm import tqdm
 import fiona 
 from shapely.geometry import shape, LineString, mapping
+from utils import repair_linestring_gpkg
+
 
 n=50
 objectid = '009.11'
@@ -32,23 +34,7 @@ def perturb_raster(raster_path, perturbed_dir, n):
         with rasterio.open(file_path, 'w', **meta) as dst:
             dst.write(data, 1)
 
-def repair_linestring_gpkg(input_file, layer, output_file):
 
-    with fiona.open(input_file, layer=layer) as src:
-        meta = src.meta
-        with fiona.open(output_file, 'w', **meta) as sink:
-            for feature in src:
-                try:
-                    geom = shape(feature['geometry'])
-                    # Check and process LineString geometries
-                    if isinstance(geom, LineString):
-                        if len(geom.coords) < 2:
-                            # Skip or handle single-point linestrings
-                            continue  # This line skips them; you might want to add a placeholder or handle differently
-                    # Write the feature to the new file if it's valid
-                    sink.write(feature)
-                except Exception as e:
-                    print(f"Error processing feature {feature['id']}: {e}")
 
 if __name__=='__main__':
     for subdir, dirs, files in os.walk(root_dir):
