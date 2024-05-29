@@ -1,9 +1,9 @@
-numpy
+numpy <2.0
 cython
 cyarray
 pytest
 click
 click-log==0.1.8
-gdal >=2.3
+gdal >=2.3, <4.0
 future
 scipy

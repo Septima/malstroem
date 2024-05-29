@@ -6,10 +6,10 @@ dependencies:
   - cython
   - cyarray
   - future
-  - gdal
-  - numpy
+  - gdal <4.0
+  - numpy <2.0
   - pip
-  - python=3.7
+  - python
   - scipy
   - pip:
     - click-log==0.1.8
