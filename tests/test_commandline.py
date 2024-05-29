@@ -157,7 +157,6 @@ def test_network(tmpdir):
                                  '-bluespots', labeledfile,
                                  '-flowdir', flowdirnoflatsfile,
                                  '-pourpoints', pourpointsfile,
-                                 '-pourpoints_layer', 0,
                                  '-out', str(tmpdir),
                                 ])
 
@@ -170,7 +169,6 @@ def test_initvolumes_mm(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli, ['initvolumes',
                                  '-nodes', nodesfile,
-                                 '-nodes_layer', 0,
                                  '-mm', 20,
                                  '-out', str(tmpdir)],)
     assert result.exit_code == 0, 'Output: {}'.format(result.output)
@@ -181,7 +179,6 @@ def test_initvolumes_pr_filetype(tmpdir, precipfile):
     runner = CliRunner()
     result = runner.invoke(cli, ['initvolumes',
                                  '-nodes', nodesfile,
-                                 '-nodes_layer', 0,
                                  '-pr', precipfile,
                                  '-pr_unit', "mm",
                                  '-bluespots', labeledfile,
@@ -194,7 +191,6 @@ def test_initvolumes_pr_unit(tmpdir, pr_unit):
     runner = CliRunner()
     result = runner.invoke(cli, ['initvolumes',
                                  '-nodes', nodesfile,
-                                 '-nodes_layer', 0,
                                  '-pr', precipraster_float_file,
                                  '-pr_unit', pr_unit,
                                  '-bluespots', labeledfile,
