@@ -43,7 +43,7 @@ AGNPS_DELTA_NP = np.array(
          [ 1,-1], # DownLeft
          [ 0,-1], # Left
          [-1,-1]  # UpLeft
-        ], dtype=np.int )
+        ], dtype=int )
 cdef long[:,:] AGNPS_DELTA_MV = AGNPS_DELTA_NP
 
 

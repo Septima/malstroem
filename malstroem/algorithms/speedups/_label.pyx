@@ -102,7 +102,7 @@ cdef label_min_index_float64_int32_cython(np.float64_t[:,:] data, np.int32_t [:,
     if not nlabels:
         nlabels = np.max(labelled)
 
-    dtype = [('value', np.float64), ('row', np.int), ('col', np.int)]
+    dtype = [('value', np.float64), ('row', int), ('col', int)]
     lmin = np.zeros((nlabels + 1,), dtype=dtype)
     lmin[:]['value'] = float('inf')
     lmin[:]['row'] = -1
@@ -133,7 +133,7 @@ cdef label_min_index_fallback_cython(data, labelled, nlabels=None):
     if not nlabels:
         nlabels = np.max(labelled)
 
-    dtype = [('value', np.float64), ('row', np.int), ('col', np.int)]
+    dtype = [('value', np.float64), ('row', int), ('col', int)]
     lmin = np.zeros((nlabels + 1,), dtype=dtype)
     lmin[:]['value'] = float('inf')
     lmin[:]['row'] = -1
