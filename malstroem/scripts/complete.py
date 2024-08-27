@@ -83,9 +83,9 @@ def process_all(dem, outdir, accum, filter, mm, zresolution, vector):
     accum_reader = io.RasterReader(accum_writer.filepath) if accum_writer else None
     pourpoint_writer = io.VectorWriter(ogr_drv, outvector, 'pourpoints', None, ogr.wkbPoint, crs, dsco=ogr_dsco, lco = ogr_lco)
     watershed_writer = io.RasterWriter(os.path.join(outdir, 'watersheds.tif'), tr, crs, 0)
-    watershed_vector_writer = io.VectorWriter(ogr_drv, outvector, 'watersheds', None, ogr.wkbMultiPolygon, crs, dsco=ogr_dsco, lco = ogr_lco) if vector else None
+    watershed_vector_writer = io.VectorWriter(ogr_drv, outvector, 'watersheds', None, ogr.wkbPolygon, crs, dsco=ogr_dsco, lco = ogr_lco) if vector else None
     labeled_writer = io.RasterWriter(os.path.join(outdir, 'bluespots.tif'), tr, crs, 0)
-    labeled_vector_writer = io.VectorWriter(ogr_drv, outvector, 'bluespots', None, ogr.wkbMultiPolygon, crs, dsco=ogr_dsco, lco = ogr_lco) if vector else None
+    labeled_vector_writer = io.VectorWriter(ogr_drv, outvector, 'bluespots', None, ogr.wkbPolygon, crs, dsco=ogr_dsco, lco = ogr_lco) if vector else None
 
     bluespot_tool = bluespots.BluespotTool(
         input_depths=depths_reader,

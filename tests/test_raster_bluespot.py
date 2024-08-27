@@ -28,11 +28,11 @@ def test_bluespots(tmpdir):
     pourpoint_writer = io.VectorWriter('gpkg', outdbfile, 'pourpoints', None, ogr.wkbPoint, dem_reader.crs)
     watershed_writer = io.RasterWriter(str(tmpdir.join('watersheds.tif')), dem_reader.transform, dem_reader.crs, 0)
 
-    watershed_vector_writer = io.VectorWriter('gpkg', outdbfile, 'watersheds', None, ogr.wkbMultiPolygon, dem_reader.crs)
+    watershed_vector_writer = io.VectorWriter('gpkg', outdbfile, 'watersheds', None, ogr.wkbPolygon, dem_reader.crs)
 
     labeled_writer = io.RasterWriter(str(tmpdir.join('labeled.tif')), dem_reader.transform, dem_reader.crs, 0)
 
-    labeled_vector_writer = io.VectorWriter('gpkg', outdbfile, 'bluespots', None, ogr.wkbMultiPolygon, dem_reader.crs)
+    labeled_vector_writer = io.VectorWriter('gpkg', outdbfile, 'bluespots', None, ogr.wkbPolygon, dem_reader.crs)
 
     bluespot_tool = bluespots.BluespotTool(
         input_depths=depths_reader,
