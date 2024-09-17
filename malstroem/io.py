@@ -19,6 +19,7 @@ from osgeo import gdal, ogr, osr
 import numpy as np
 import json
 
+gdal.UseExceptions()
 
 class RasterReader(object):
     """Read a GDAL supported raster into a 2D numpy array
