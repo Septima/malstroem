@@ -26,7 +26,7 @@ Water flows from one cell to one other cell (the D8 method).
 
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __description__ = "Calculate terrain bluespots and flow"
 __author__ = "Asger Skovbo Petersen"
 __email__ = "asger@septima.dk"
