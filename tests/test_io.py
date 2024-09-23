@@ -66,7 +66,7 @@ def test_write_raster_datatypes(tmpdir):
     tmppath = Path(tmpdir)
 
     for dt in data_types:
-        filepath = tmppath / "dt.tif"
+        filepath = tmppath / f"{dt}.tif"
         cast_data = data.astype(dt)
         writer = io.RasterWriter(str(filepath), gt, "", nodata=None)
         writer.write(cast_data)
